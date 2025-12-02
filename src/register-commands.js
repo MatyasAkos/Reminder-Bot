@@ -56,7 +56,7 @@ const commands = [
             {
                 name: 'days_in_advance',
                 description: 'How many days in advance should the reminder be sent?',
-                type: ApplicationCommandOptionType.Number,
+                type: ApplicationCommandOptionType.Integer,
                 required: true
             }
         ]
@@ -72,7 +72,7 @@ const commands = [
             {
                 name: 'id',
                 description: 'The id of the exam to remove.',
-                type: ApplicationCommandOptionType.Number,
+                type: ApplicationCommandOptionType.Integer,
                 required: true
             },
         ]

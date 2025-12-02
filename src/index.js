@@ -111,6 +111,9 @@ client.on('interactionCreate', (interaction) => {
                     else if(cf.exams.length < interaction.options.get('id').value){
                         interaction.reply('There aren\'t that many exams.')
                     }
+                    else if(interaction.options.get('id') <= 0){
+                        interaction.reply('Id mustn\'t be 0 or negative')
+                    }
                     else{
                         const subj = cf.exams[interaction.options.get('id').value - 1].subject
                         cf.exams.splice(interaction.options.get('id').value - 1, 1)
@@ -149,7 +152,7 @@ function toDate(datestr){
 
 async function reminder() {
     const path = 'config'
-    const timeout = 60000
+    const timeout = 10000
     setTimeout(() => {
         fs.readdir(path, (err, files) => {
             files.forEach(async (file) => {
@@ -160,13 +163,16 @@ async function reminder() {
                 }
                 else{
                     i = 0
+                    result = '@everyone'
+                    notify = false
                     while(i < cf.exams.length){
                         const examtime = new Date(cf.exams[i].year, cf.exams[i].month, cf.exams[i].day, cf.time.hour, cf.time.minute, 0)
                         const remindtime = new Date(cf.exams[i].year, cf.exams[i].month, cf.exams[i].day - cf.inadvance, cf.time.hour, cf.time.minute, 0)
                         const now = new Date()
                         if (remindtime.getTime() <= now.getTime() && !cf.exams[i].notifiedabout) {
-                            client.channels.cache.get(cf.channelid).send(`@everyone there is an upcoming ${cf.exams[i].subject} ${cf.exams[i].type} on ${cf.exams[i].year > new Date().getFullYear() ? `${cf.exams[i].year}.` : ''}${cf.exams[i].month < 9 ? '0' : ''}${cf.exams[i].month + 1}.${cf.exams[i].day < 10 ? '0' : ''}${cf.exams[i].day}.${(cf.exams[i].topic || '') === '' ? '' : ` with the topic of: ${cf.exams[i].topic}`}`)
+                            result += (`\nThere is an upcoming ${cf.exams[i].subject} ${cf.exams[i].type} on ${cf.exams[i].year > new Date().getFullYear() ? `${cf.exams[i].year}.` : ''}${cf.exams[i].month < 9 ? '0' : ''}${cf.exams[i].month + 1}.${cf.exams[i].day < 10 ? '0' : ''}${cf.exams[i].day}.${(cf.exams[i].topic || '') === '' ? '' : ` with the topic of: ${cf.exams[i].topic}`}`)
                             cf.exams[i].notifiedabout = true
+                            notify = true
                         }
                         if (examtime.getTime() <= now.getTime()){
                             cf.exams.splice(i, 1)
@@ -174,6 +180,9 @@ async function reminder() {
                         else{
                             i++
                         }
+                    }
+                    if (notify){
+                        client.channels.cache.get(cf.channelid).send(result)
                     }
                     fs.writeFileSync(`${path}/${file}`, JSON.stringify(cf))
                 }
