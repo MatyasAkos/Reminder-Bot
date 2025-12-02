@@ -8,6 +8,10 @@ const client = new Client({
 })
 
 client.on('clientReady', () => {
+    const folderName = 'config'
+    if (!fs.existsSync(folderName)) {
+        fs.mkdirSync(folderName);
+    }
     reminder()
 })
 
@@ -124,6 +128,14 @@ client.on('interactionCreate', (interaction) => {
                 else if(interaction.commandName === 'getconfig'){
                     cf = JSON.parse(fs.readFileSync(path))
                     interaction.reply(`I am configured to send a reminder at ${cf.time.hour < 10 ? '0' : ''}${cf.time.hour}:${cf.time.minute < 10 ? '0' : ''}${cf.time.minute}, ${cf.inadvance} days in advance in <#${cf.channelid}>`)
+                }
+                else if(interaction.commandName === 'removeall'){
+                    cf = JSON.parse(fs.readFileSync(path))
+                    cf.exams = []
+                    fs.writeFileSync(JSON.stringify(cf))    
+                }
+                else if(interaction.commandName === 'reset'){
+                    fs.rmSync(path)
                 }
             })
         }

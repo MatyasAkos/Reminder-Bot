@@ -84,6 +84,14 @@ const commands = [
     {
         name: 'getconfig',
         description: 'Displays all info in the config.'
+    },
+    {
+        name: 'removeall',
+        description: 'Removes all exams.'
+    },
+    {
+        name: 'reset',
+        description: 'Resets and deletes the configs.'
     }
 ]
 
