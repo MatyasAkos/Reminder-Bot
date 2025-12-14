@@ -14,4 +14,4 @@ function list(){
         }
     }
 }
-export {list}
+module.exports = {list}

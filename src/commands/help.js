@@ -10,4 +10,4 @@ function help(){
     .setColor(0xFF6600)
     interaction.reply({embeds: [embed] })
 }
-export {help}
+module.exports = {help}

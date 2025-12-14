@@ -132,7 +132,7 @@ function toDate(datestr){
         return null
     }
 }
-export {toDate}
+module.exports = {toDate}
 
 
 client.login(process.env.TOKEN)

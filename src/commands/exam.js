@@ -1,4 +1,4 @@
-import { toDate } from ".."
+const { toDate } = require('./../index')
 
 function exam(){
     var cf = JSON.parse(fs.readFileSync(path))
@@ -7,7 +7,8 @@ function exam(){
     const subjectlen = 30
     const typelen = 30
     const topiclen = 256
-    const date = toDate(interaction.options.get('date').value)
+    const date = toDate
+    (interaction.options.get('date').value)
 
     if (cf.exams !== undefined && cf.exams.length >= maxexam){
         interaction.reply(`You cannot have more than ${maxexam} exams at a time!`)
@@ -41,4 +42,4 @@ function exam(){
         interaction.reply(`Successfully added new ${interaction.options.get('type').value} on ${date.getFullYear()}.${date.getMonth() < 9 ? '0' : ''}${date.getMonth() + 1}.${date.getDate() < 10 ? '0' : ''}${date.getDate()}. in subject ${interaction.options.get('subject').value}${(interaction.options.get('topic') || '') === '' ? '' : ` with the topic of: ${interaction.options.get('topic').value}`}`)
     }
 }
-export {exam}
+module.exports = {exam}

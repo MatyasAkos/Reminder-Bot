@@ -16,4 +16,4 @@ function config(){
         interaction.reply(`Invalid time: ${t}`)
     }
 }
-export {config}
+module.exports = {config}

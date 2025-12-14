@@ -4,4 +4,4 @@ function removeall(){
     fs.writeFileSync(path, JSON.stringify(cf))
     interaction.reply('Removed all exams')
 }
-export {removeall}
+module.exports = {removeall}

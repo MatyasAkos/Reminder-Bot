@@ -16,4 +16,4 @@ function remove(){
         interaction.reply(`Successfully removed ${subj} exam.`)
     }
 }
-export {remove}
+module.exports = {remove}
