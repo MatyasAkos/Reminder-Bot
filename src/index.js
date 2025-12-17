@@ -1,6 +1,6 @@
 require('dotenv').config()
 
-const {Client} = require('discord.js')
+const {Client, EmbedBuilder} = require('discord.js')
 const fs = require('fs')
 const { help } = require('./commands/help')
 const { config } = require('./commands/config')
@@ -61,7 +61,7 @@ client.on('interactionCreate', (interaction) => {
 
 function reminder() {
     const path = 'config'
-    const timeout = 60000
+const timeout = 60000
     setTimeout(() => {
         fs.readdir(path, async (err, files) => {
             for (i = 0; i < files.length; i++) {
@@ -72,8 +72,8 @@ function reminder() {
                 }
                 else{
                     j = 0
-                    const ping = '@everyone'
-                    result = ping
+                    ping = '@everyone'
+                    first = true
                     next = ''
                     while(j < cf.exams.length){
                         result += next
@@ -93,14 +93,29 @@ function reminder() {
                         else{
                             j++
                         }
-                        if(result.length + next.length > 2000){
-                            client.channels.cache.get(cf.channelid).send(result)
+                        if(result.length + next.length > 1000){
+                            embed = new EmbedBuilder()
+                            .addFields({name: ping, value: result})
+                            .setColor(cf.embedcolor)
+                            if(first){
+                                embed.setTitle('Upcoming exams')
+                                first = false
+                                ping = ''
+                            }
+                            client.channels.cache.get(cf.channelid).send({embeds: [embed] })
                             result = ''
                         }
                     }
                     result += next
-                    if (result !== ping && result !== ''){
-                        client.channels.cache.get(cf.channelid).send(result)
+                    if (result !== ''){
+                        embed = new EmbedBuilder()
+                        .addFields({name: ping, value: result})
+                        .setColor(cf.embedcolor)
+                        if(first){
+                            embed.setTitle('Upcoming exams')
+                            first = false
+                        }
+                        client.channels.cache.get(cf.channelid).send({embeds: [embed] })
                     }
                     fs.writeFileSync(`${path}/${files[i]}`, JSON.stringify(cf))
                 }

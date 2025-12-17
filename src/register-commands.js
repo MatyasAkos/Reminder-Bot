@@ -58,6 +58,12 @@ const commands = [
                 description: 'How many days in advance should the reminder be sent?',
                 type: ApplicationCommandOptionType.Integer,
                 required: true
+            },
+            {
+                name: 'embedcolor',
+                description: 'Sets the color of the embeds in the reminders and the list produced by /list.',
+                type: ApplicationCommandOptionType.String,
+                required: false
             }
         ]
     },
