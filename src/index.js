@@ -61,7 +61,7 @@ client.on('interactionCreate', (interaction) => {
 
 function reminder() {
     const path = 'config'
-const timeout = 60000
+    const timeout = 1000
     setTimeout(() => {
         fs.readdir(path, async (err, files) => {
             for (i = 0; i < files.length; i++) {
@@ -71,19 +71,37 @@ const timeout = 60000
                     fs.rmSync(`${path}/${files[i]}`)
                 }
                 else{
+                    embed = new EmbedBuilder()
+                    .setTitle('Upcoming exams')
+                    .setColor(cf.embedcolor)
+                    nm = ''
+                    val = ''
+                    const ping = '@everyon3'
+                    fieldscnt = 0
+                    charcnt = 0
+                    result = []
                     j = 0
-                    ping = '@everyone'
-                    first = true
-                    next = ''
+                    sendmsg = false
                     while(j < cf.exams.length){
-                        result += next
-                        next = ''
                         const examtime = new Date(cf.exams[j].year, cf.exams[j].month, cf.exams[j].day, cf.time.hour, cf.time.minute, 0)
                         const remindtime = new Date(cf.exams[j].year, cf.exams[j].month, cf.exams[j].day - cf.inadvance, cf.time.hour, cf.time.minute, 0)
                         const now = new Date()
                         if (remindtime.getTime() <= now.getTime() && !cf.exams[j].notifiedabout) {
-                            if(j < cf.exams.length){
-                                next = `\nThere is an upcoming ${cf.exams[j].subject} ${cf.exams[j].type} on ${cf.exams[j].year > new Date().getFullYear() ? `${cf.exams[j].year}.` : ''}${cf.exams[j].month < 9 ? '0' : ''}${cf.exams[j].month + 1}.${cf.exams[j].day < 10 ? '0' : ''}${cf.exams[j].day}.${(cf.exams[j].topic || '') === '' ? '' : ` with the topic of: ${cf.exams[j].topic}`}`
+                            sendmsg = true
+                            nm = `${cf.exams[j].type} in ${cf.exams[j].subject} on ${cf.exams[j].year > new Date().getFullYear() ? `${cf.exams[j].year}.` : ''}${cf.exams[j].month < 9 ? '0' : ''}${cf.exams[j].month + 1}.${cf.exams[j].day < 10 ? '0' : ''}${cf.exams[j].day}.`
+                            val = cf.exams[j].topic || ''
+                            if(fieldscnt === 25 || charcnt + nm.length + val.length > 6000){
+                                result.push(embed)
+                                embed = new EmbedBuilder()
+                                .setColor(cf.embedcolor)
+                                .addFields({name: nm, value: val})
+                                fieldscnt = 0
+                                charcnt = nm.length + val.length
+                            }
+                            else{
+                                embed.addFields({name: nm, value: val})
+                                charcnt += nm.length + val.length
+                                fieldscnt++
                             }
                             cf.exams[j].notifiedabout = true
                         }
@@ -93,31 +111,16 @@ const timeout = 60000
                         else{
                             j++
                         }
-                        if(result.length + next.length > 1000){
-                            embed = new EmbedBuilder()
-                            .addFields({name: ping, value: result})
-                            .setColor(cf.embedcolor)
-                            if(first){
-                                embed.setTitle('Upcoming exams')
-                                first = false
-                                ping = ''
-                            }
-                            client.channels.cache.get(cf.channelid).send({embeds: [embed] })
-                            result = ''
-                        }
                     }
-                    result += next
-                    if (result !== ''){
-                        embed = new EmbedBuilder()
-                        .addFields({name: ping, value: result})
-                        .setColor(cf.embedcolor)
-                        if(first){
-                            embed.setTitle('Upcoming exams')
-                            first = false
+                    console.log(result)
+                    if(sendmsg){
+                        result.push(embed)
+                        client.channels.cache.get(cf.channelid).send({content: ping, embeds: [result[0]]})
+                        for (let k = 1; k < result.length; k++) {
+                            client.channels.cache.get(cf.channelid).send({embeds: [result[k]]})
                         }
-                        client.channels.cache.get(cf.channelid).send({embeds: [embed] })
+                        fs.writeFileSync(`${path}/${files[i]}`, JSON.stringify(cf))
                     }
-                    fs.writeFileSync(`${path}/${files[i]}`, JSON.stringify(cf))
                 }
             }
             reminder()
@@ -136,4 +139,4 @@ async function channelExists(channelId) {
 }
 
 
-client.login(process.env.TOKEN)//
+client.login(process.env.TOKEN)

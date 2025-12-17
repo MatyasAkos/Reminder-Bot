@@ -7,32 +7,40 @@ async function list(interaction, path, client){
         interaction.reply('There are no upcoming exams.')
     }
     else{
-        result = ''
-        msgcnt = 0;
-        next = `1. ${cf.exams[0].type} in ${cf.exams[0].subject} on ${cf.exams[0].year > new Date().getFullYear() ? `${cf.exams[0].year}.` : ''}${cf.exams[0].month < 9 ? '0' : ''}${cf.exams[0].month + 1}.${cf.exams[0].day < 10 ? '0' : ''}${cf.exams[0].day}.${(cf.exams[0].topic || '') === '' ? '' : ` with the topic of: ${cf.exams[0].topic}`}\n`
+        const title = 'List of exams'
+        embed = new EmbedBuilder()
+        .setTitle(title)
+        .setColor(cf.embedcolor)
+        fieldscnt = 0
+        charcnt = title.length
+        nm = ''
+        val = ''
+        result = []
+        //nextname = `${cf.exams[i].type} in ${cf.exams[i].subject} on ${cf.exams[i].year > new Date().getFullYear() ? `${cf.exams[i].year}.` : ''}${cf.exams[i].month < 9 ? '0' : ''}${cf.exams[i].month + 1}.${cf.exams[i].day < 10 ? '0' : ''}${cf.exams[i].day}.`
+        //nextvalue = (cf.exams[i].topic || '') === '' ? '' : ` with the topic of: ${cf.exams[i].topic}`
         await client.channels.fetch(interaction.channelId)
-        for (let i = 1; i < cf.exams.length + 1; i++) {
-            result += next
-            if (i < cf.exams.length - 1)
-            next = `${i + 1}. ${cf.exams[i].type} in ${cf.exams[i].subject} on ${cf.exams[i].year > new Date().getFullYear() ? `${cf.exams[i].year}.` : ''}${cf.exams[i].month < 9 ? '0' : ''}${cf.exams[i].month + 1}.${cf.exams[i].day < 10 ? '0' : ''}${cf.exams[i].day}.${(cf.exams[i].topic || '') === '' ? '' : ` with the topic of: ${cf.exams[i].topic}`}\n`
-            if(result.length + next.length > 1000 || i === cf.exams.length - 1){
-                if (msgcnt === 0){
-                    const embed = new EmbedBuilder()
-                    .setTitle('List of exams')
-                    .addFields({name: '', value: result})
-                    .setColor(cf.embedcolor)
-                    interaction.reply({embeds: [embed] })
-                    console.log(result)
-                }
-                else{
-                    const embed = new EmbedBuilder()
-                    .addFields({name: '', value: result})
-                    .setColor(cf.embedcolor)
-                    client.channels.cache.get(interaction.channelId).send({embeds: [embed] })
-                }
-                msgcnt++
-                result = ''
+        for (let i = 0; i < cf.exams.length; i++) {
+            //next = `${i + 1}. ${cf.exams[i].type} in ${cf.exams[i].subject} on ${cf.exams[i].year > new Date().getFullYear() ? `${cf.exams[i].year}.` : ''}${cf.exams[i].month < 9 ? '0' : ''}${cf.exams[i].month + 1}.${cf.exams[i].day < 10 ? '0' : ''}${cf.exams[i].day}.${(cf.exams[i].topic || '') === '' ? '' : ` with the topic of: ${cf.exams[i].topic}`}\n`
+            nm = `${cf.exams[i].type} in ${cf.exams[i].subject} on ${cf.exams[i].year > new Date().getFullYear() ? `${cf.exams[i].year}.` : ''}${cf.exams[i].month < 9 ? '0' : ''}${cf.exams[i].month + 1}.${cf.exams[i].day < 10 ? '0' : ''}${cf.exams[i].day}.`
+            val = cf.exams[i].topic || ''
+            if(fieldscnt === 25 || charcnt + nm.length + val.length > 6000){
+                result.push(embed)
+                embed = new EmbedBuilder()
+                .setColor(cf.embedcolor)
+                .addFields({name: nm, value: val})
+                fieldscnt = 0
+                charcnt = nm.length + val.length
             }
+            else{
+                embed.addFields({name: nm, value: val})
+                charcnt += nm.length + val.length
+                fieldscnt++
+            }
+        }
+        result.push(embed)
+        interaction.reply({embeds: [result[0]]})
+        for (let i = 1; i < result.length; i++) {
+            client.channels.cache.get(interaction.channelId).send({embeds: [result[i]]})
         }
     }
 }
