@@ -61,7 +61,7 @@ client.on('interactionCreate', (interaction) => {
 
 function reminder() {
     const path = 'config'
-    const timeout = 1000
+    const timeout = 60000
     setTimeout(() => {
         fs.readdir(path, async (err, files) => {
             for (i = 0; i < files.length; i++) {

@@ -25,6 +25,8 @@ function exam(interaction, path){
         interaction.reply(`Topic longer than ${topiclen} characters!`)
     }
     else{
+        const now = new Date()
+        const notifytime = new Date(date.getFullYear(), date.getMonth(), date.getDate() - cf.inadvance, cf.time.hour, cf.time.minute, 0)
         cf.exams.push({
             'year': date.getFullYear(),
             'month': date.getMonth(),
@@ -32,7 +34,7 @@ function exam(interaction, path){
             'subject': interaction.options.get('subject').value,
             'type': interaction.options.get('type').value,
             'topic': interaction.options.get('topic')?.value || '',
-            'notifiedabout': false
+            'notifiedabout': now.getTime() > notifytime.getTime()
         })
         cf.exams.sort((a, b) => {
             return new Date(a.year, a.month, a.day).getTime() - new Date(b.year, b.month, b.day).getTime()
