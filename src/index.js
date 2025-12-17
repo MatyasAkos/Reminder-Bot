@@ -59,9 +59,9 @@ client.on('interactionCreate', (interaction) => {
     }
 })
 
-async function reminder() {
+function reminder() {
     const path = 'config'
-    const timeout = 10000
+    const timeout = 1000
     setTimeout(() => {
         fs.readdir(path, async (err, files) => {
             for (i = 0; i < files.length; i++) {
@@ -72,16 +72,20 @@ async function reminder() {
                 }
                 else{
                     j = 0
-                    result = '@everyone'
-                    notify = false
+                    const ping = '@everyone'
+                    result = ping
+                    next = ''
                     while(j < cf.exams.length){
+                        result += next
+                        next = ''
                         const examtime = new Date(cf.exams[j].year, cf.exams[j].month, cf.exams[j].day, cf.time.hour, cf.time.minute, 0)
                         const remindtime = new Date(cf.exams[j].year, cf.exams[j].month, cf.exams[j].day - cf.inadvance, cf.time.hour, cf.time.minute, 0)
                         const now = new Date()
                         if (remindtime.getTime() <= now.getTime() && !cf.exams[j].notifiedabout) {
-                            result += (`\nThere is an upcoming ${cf.exams[j].subject} ${cf.exams[j].type} on ${cf.exams[j].year > new Date().getFullYear() ? `${cf.exams[j].year}.` : ''}${cf.exams[j].month < 9 ? '0' : ''}${cf.exams[j].month + 1}.${cf.exams[j].day < 10 ? '0' : ''}${cf.exams[j].day}.${(cf.exams[j].topic || '') === '' ? '' : ` with the topic of: ${cf.exams[j].topic}`}`)
+                            if(j < cf.exams.length){
+                                next = `\nThere is an upcoming ${cf.exams[j].subject} ${cf.exams[j].type} on ${cf.exams[j].year > new Date().getFullYear() ? `${cf.exams[j].year}.` : ''}${cf.exams[j].month < 9 ? '0' : ''}${cf.exams[j].month + 1}.${cf.exams[j].day < 10 ? '0' : ''}${cf.exams[j].day}.${(cf.exams[j].topic || '') === '' ? '' : ` with the topic of: ${cf.exams[j].topic}`}`
+                            }
                             cf.exams[j].notifiedabout = true
-                            notify = true
                         }
                         if (examtime.getTime() <= now.getTime()){
                             cf.exams.splice(j, 1)
@@ -89,10 +93,14 @@ async function reminder() {
                         else{
                             j++
                         }
-                        if(result.length > 1000 || (j === cf.exams.length - 1 && notify)){
+                        if(result.length + next.length > 2000){
                             client.channels.cache.get(cf.channelid).send(result)
                             result = ''
                         }
+                    }
+                    result += next
+                    if (result !== ping && result !== ''){
+                        client.channels.cache.get(cf.channelid).send(result)
                     }
                     fs.writeFileSync(`${path}/${files[i]}`, JSON.stringify(cf))
                 }
