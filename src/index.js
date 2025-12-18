@@ -112,7 +112,6 @@ function reminder() {
                             j++
                         }
                     }
-                    console.log(result)
                     if(sendmsg){
                         result.push(embed)
                         client.channels.cache.get(cf.channelid).send({content: ping, embeds: [result[0]]})
