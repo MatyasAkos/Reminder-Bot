@@ -34,7 +34,14 @@ client.on('interactionCreate', (interaction) => {
                     config(interaction, path, filedoesntexist)
                 }
                 else if (filedoesntexist){
-                    interaction.reply('Please configure the bot first!')
+                    const embed = new EmbedBuilder()
+                    .setColor(0xD80000)
+                    .setTitle('The bot isn\'t configured yet')
+                    .addFields({
+                        name: '',
+                        value: 'Please configure the bot first!'
+                    })
+                    interaction.reply({embeds: [embed]})
                 }
                 else if (interaction.commandName === 'exam'){
                     exam(interaction, path)

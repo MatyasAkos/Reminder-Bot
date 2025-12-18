@@ -4,7 +4,14 @@ const fs = require('fs')
 async function list(interaction, path, client){
     cf = JSON.parse(fs.readFileSync(path))
     if(cf.exams.length === 0){
-        interaction.reply('There are no upcoming exams.')
+        const embed = new EmbedBuilder()
+        .setColor(cf.embedcolor)
+        .setTitle('No upcoming exams')
+        .addFields({
+            name: '',
+            value: 'There are no upcoming exams'
+        })
+        interaction.reply({embeds: [embed]})
     }
     else{
         const title = 'List of exams'
@@ -21,7 +28,7 @@ async function list(interaction, path, client){
         await client.channels.fetch(interaction.channelId)
         for (let i = 0; i < cf.exams.length; i++) {
             //next = `${i + 1}. ${cf.exams[i].type} in ${cf.exams[i].subject} on ${cf.exams[i].year > new Date().getFullYear() ? `${cf.exams[i].year}.` : ''}${cf.exams[i].month < 9 ? '0' : ''}${cf.exams[i].month + 1}.${cf.exams[i].day < 10 ? '0' : ''}${cf.exams[i].day}.${(cf.exams[i].topic || '') === '' ? '' : ` with the topic of: ${cf.exams[i].topic}`}\n`
-            nm = `${cf.exams[i].type} in ${cf.exams[i].subject} on ${cf.exams[i].year > new Date().getFullYear() ? `${cf.exams[i].year}.` : ''}${cf.exams[i].month < 9 ? '0' : ''}${cf.exams[i].month + 1}.${cf.exams[i].day < 10 ? '0' : ''}${cf.exams[i].day}.`
+            nm = `${i + 1}. ${cf.exams[i].type} in ${cf.exams[i].subject} on ${cf.exams[i].year > new Date().getFullYear() ? `${cf.exams[i].year}.` : ''}${cf.exams[i].month < 9 ? '0' : ''}${cf.exams[i].month + 1}.${cf.exams[i].day < 10 ? '0' : ''}${cf.exams[i].day}.`
             val = cf.exams[i].topic || ''
             if(fieldscnt === 25 || charcnt + nm.length + val.length > 6000){
                 result.push(embed)
