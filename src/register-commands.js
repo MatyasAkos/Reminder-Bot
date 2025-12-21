@@ -51,13 +51,13 @@ const commands = [
                 name: 'time',
                 description: 'At what time should the reminders be sent (HH:MM)?',
                 type: ApplicationCommandOptionType.String,
-                required: true
+                required: false
             },
             {
                 name: 'days_in_advance',
                 description: 'How many days in advance should the reminder be sent?',
                 type: ApplicationCommandOptionType.Integer,
-                required: true
+                required: false
             },
             {
                 name: 'embedcolor',

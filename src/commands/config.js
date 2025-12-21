@@ -4,65 +4,89 @@ const { spam } = require('../other')
 const db = new Database('database.db', {fileMustExist: true})
 
 function config(interaction, rowexists){
-    const t = interaction.options.get('time').value
-    const isvalidtime = /^((2[0-3])|([01]\d)):[0-5]\d$/.test(t)
-    embedcolor = interaction.options.get('embedcolor')?.value
+    const time = interaction.options.get('time')?.value
+    const isvalidtime = /^((2[0-3])|([01]\d)):[0-5]\d$/.test(time)
+    const embedcolor = interaction.options.get('embedcolor')?.value
+    const inadvance = interaction.options.get('days_in_advance')?.value
+    iserror = false
     embed = new EmbedBuilder()
-    if (!isvalidtime){
+    if (time !== undefined && !isvalidtime){
         embed.addFields({
             name: 'Invalid time',
-            value: `${t} is not a valid time in HH:MM format`
+            value: `${time} is not a valid time in HH:MM format`
         })
     }   
     const isvalidcolor = /^#(\d|[A-Fa-f]){6}$/.test(embedcolor)
-    if (!isvalidcolor && embedcolor !== undefined){
+    if (embedcolor !== undefined && !isvalidcolor){
         embed.addFields({
             name: 'Invalid color code',
             value: `${embedcolor} is not a valid hex color code`
         })
+        iserror = true
     }
-    if(interaction.options.get('days_in_advance').value < 0){
+    if (inadvance !== undefined && inadvance < 0){
         embed.addFields({
             name: 'Invalid value for days in advance',
             value: 'Days in advance mustn\'t be negative'
         })
+        iserror = true
     }
-    if (isvalidtime && (isvalidcolor || embedcolor === undefined)){
+    if (!rowexists){
+        if(time === undefined){
+            embed.addFields({
+                name: 'Time not specified',
+                value: 'Time must be specified when first configing the bot'
+            })
+            iserror = true
+        }
+        if(inadvance === undefined){
+            embed.addFields({
+                name: 'Days in advance not specifed',
+                value: 'Days in advance must be specified when first configing the bot'
+            })
+            iserror = true
+        }
+    }
+    else{
+        const oldchannelid = db
+        .prepare('SELECT channelid FROM servers WHERE guildid = ?')
+        .get(interaction.guildId)
+        .channelid
+        if ((time === undefined) && (inadvance === undefined) && (embedcolor === undefined) && (oldchannelid === interaction.channelId)){
+            embed.addFields({
+                name: 'No changes specified',
+                value: 'At least one change should be specified'
+            })
+            iserror = true
+        }
+    }
+    if (!iserror){
         const values = {
             guildid: interaction.guildId,
-            hour: parseInt(t.slice(0, 2)),
-            minute: parseInt(t.slice(3, 5)),
-            inadvance: parseInt(interaction.options.get('days_in_advance').value),
+            hour: parseInt(time?.slice(0, 2)),
+            minute: parseInt(time?.slice(3, 5)),
+            inadvance: inadvance,
             channelid: interaction.channelId,
-            embedcolor: Number(`0x${embedcolor?.slice(1, 7)}`) || 0x008000
+            embedcolor: embedcolor !== undefined ? Number(`0x${embedcolor?.slice(1, 7)}`) : 0x008000
         }
         if (rowexists){
-            if (embedcolor === undefined){
-                db
-                .prepare('UPDATE servers SET hour = @hour, minute = @hour, inadvance = @inadvance, channelid = @channelid WHERE guildid = @guildid')
-                .run(values)
-            }
-            else{
-                db
-                .prepare('UPDATE servers SET hour = @hour, minute = @hour, inadvance = @inadvance, channelid = @channelid, embedcolor = @embedcolor WHERE guildid = @guildid')
-                .run(values)
-            }
+            console.log(`UPDATE servers SET ${time === undefined ? '' : 'hour = @hour, minute = @minute,'} ${inadvance === undefined ? '' : 'inadvance = @inadvance,'} ${embedcolor === undefined ? '' : 'embedcolor = @embedcolor,'} channelid = @channelid WHERE guildid = @guildid`)
+            db
+            .prepare(`UPDATE servers SET ${time === undefined ? '' : 'hour = @hour, minute = @minute,'} ${inadvance === undefined ? '' : 'inadvance = @inadvance,'} ${embedcolor === undefined ? '' : 'embedcolor = @embedcolor,'} channelid = @channelid WHERE guildid = @guildid`)
+            .run(values)
         }
         else{
             db
             .prepare('INSERT INTO servers VALUES (@guildid, @hour, @minute, @inadvance, @channelid, @embedcolor)')
             .run(values)
         }
-        if(embedcolor === undefined){
-            embedcolor = db
-            .prepare('SELECT embedcolor FROM servers WHERE guildid = @guildid')
-            .get(values)
-            .embedcolor
-        }
+        const newvalues = db
+        .prepare('SELECT hour, minute, inadvance, embedcolor FROM servers WHERE guildid = @guildid')
+        .get(values)
         embed
         .setColor(0x00C000)
         .setTitle('Config')
-        .setDescription(`Successfully configured bot to send reminders at ${t}, ${interaction.options.get('days_in_advance').value} days in advance, with the color #${spam('0', 6 - embedcolor.toString(16).length)}${embedcolor.toString(16).toUpperCase()}.`)
+        .setDescription(`Successfully configured bot to send reminders at ${newvalues.hour}:${newvalues.minute}, ${newvalues.inadvance} days in advance, with the color #${spam('0', 6 - newvalues.embedcolor.toString(16).length)}${newvalues.embedcolor.toString(16).toUpperCase()}.`)
     }
     else{
         embed
