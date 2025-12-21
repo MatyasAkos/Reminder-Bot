@@ -70,7 +70,6 @@ function config(interaction, rowexists){
             embedcolor: embedcolor !== undefined ? Number(`0x${embedcolor?.slice(1, 7)}`) : 0x008000
         }
         if (rowexists){
-            console.log(`UPDATE servers SET ${time === undefined ? '' : 'hour = @hour, minute = @minute,'} ${inadvance === undefined ? '' : 'inadvance = @inadvance,'} ${embedcolor === undefined ? '' : 'embedcolor = @embedcolor,'} channelid = @channelid WHERE guildid = @guildid`)
             db
             .prepare(`UPDATE servers SET ${time === undefined ? '' : 'hour = @hour, minute = @minute,'} ${inadvance === undefined ? '' : 'inadvance = @inadvance,'} ${embedcolor === undefined ? '' : 'embedcolor = @embedcolor,'} channelid = @channelid WHERE guildid = @guildid`)
             .run(values)
