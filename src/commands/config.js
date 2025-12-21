@@ -34,7 +34,7 @@ function config(interaction, rowexists){
             minute: parseInt(t.slice(3, 5)),
             inadvance: parseInt(interaction.options.get('days_in_advance').value),
             channelid: interaction.channelId,
-            embedcolor: Number(`0x${embedcolor?.slice(1, 7)}`)
+            embedcolor: Number(`0x${embedcolor?.slice(1, 7)}`) || 0x008000
         }
         if (rowexists){
             if (embedcolor === undefined){
