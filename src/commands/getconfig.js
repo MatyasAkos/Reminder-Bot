@@ -1,5 +1,6 @@
 const Database = require('better-sqlite3')
 const { EmbedBuilder } = require('discord.js')
+const { spam } = require('../other')
 const db = new Database('database.db', {fileMustExist: true})
 
 function getconfig(interaction){
@@ -13,11 +14,3 @@ function getconfig(interaction){
     interaction.reply({embeds: [embed]})
 }
 module.exports = {getconfig}
-
-function spam(string, times){
-    result = ''
-    for (let i = 0; i < times; i++) {
-        result += string
-    }
-    return result
-}

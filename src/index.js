@@ -9,6 +9,7 @@ const { getconfig } = require('./commands/getconfig')
 const { removeall } = require('./commands/removeall')
 const { reset } = require('./commands/reset')
 const Database = require('better-sqlite3')
+const { channelExists } = require('./other')
 const client = new Client({
     intents: []
 })
@@ -67,7 +68,7 @@ function reminder() {
             .prepare('SELECT * FROM servers')
             .all()
             for (i = 0; i < confs.length; i++) {
-                const chexists = await channelExists(confs[i].channelid)
+                const chexists = await channelExists(client, confs[i].channelid)
                 if (!chexists){
                     db
                     .prepare('DELETE FROM servers WHERE guildid = ?')
@@ -132,14 +133,5 @@ function reminder() {
     }, timeout)
 }
 
-function channelExists(channelId) {
-    return client.channels.fetch(channelId)
-    .then(() => {
-        return true
-    })
-    .catch(() => {
-        return false
-    })
-}
 
 client.login(process.env.TOKEN)
