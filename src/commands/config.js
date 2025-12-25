@@ -85,7 +85,7 @@ function config(interaction, rowexists){
         embed
         .setColor(0x00C000)
         .setTitle('Config')
-        .setDescription(`Successfully configured bot to send reminders at ${newvalues.hour}:${newvalues.minute}, ${newvalues.inadvance} days in advance, with the color #${spam('0', 6 - newvalues.embedcolor.toString(16).length)}${newvalues.embedcolor.toString(16).toUpperCase()}.`)
+        .setDescription(`Successfully configured bot to send reminders at ${newvalues.hour < 10 ? '0' : ''}${newvalues.hour}:${newvalues.minute < 10 ? '0' : ''}${newvalues.minute}, ${newvalues.inadvance} days in advance, with the color #${spam('0', 6 - newvalues.embedcolor.toString(16).length)}${newvalues.embedcolor.toString(16).toUpperCase()}.`)
     }
     else{
         embed
