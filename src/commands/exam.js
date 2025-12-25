@@ -15,7 +15,7 @@ async function exam(interaction){
     const isnottoolongsubjectlen = interaction.options.get('subject').value.length <= subjectlen
     const isnottoolongtypelen = interaction.options.get('type').value.length <= typelen
     const isnottoolongtopiclen = (interaction.options.get('topic')?.value || '').length <= topiclen
-    const isvalidroles = /^(<@&\d+> ?)+$/.test(interaction.options.get('special_roles')?.value || '<@&0>')
+    const isvalidroles = /^(<@&\d+>)( <@&\d+>)*$/.test(interaction.options.get('special_roles')?.value || '<@&0>')
 
     let embed = new EmbedBuilder()
 
