@@ -1,5 +1,5 @@
 require('dotenv').config()
-const {Client, EmbedBuilder} = require('discord.js')
+const {Client, EmbedBuilder, IntentsBitField} = require('discord.js')
 const { help } = require('./commands/help')
 const { config } = require('./commands/config')
 const { exam } = require('./commands/exam')
@@ -9,9 +9,10 @@ const { getconfig } = require('./commands/getconfig')
 const { removeall } = require('./commands/removeall')
 const { reset } = require('./commands/reset')
 const Database = require('better-sqlite3')
-const { channelExists } = require('./other')
+const { channelExists, listRoles } = require('./other')
 const client = new Client({
-    intents: []
+    intents: [
+        IntentsBitField.Flags.Guilds]
 })
 const db = new Database('database.db', {fileMustExist: true})
 const timeout = process.env.TIMEOUT
@@ -75,27 +76,30 @@ function reminder() {
                     .run(confs[i].guildId)
                 }
                 else{
-                    embed = new EmbedBuilder()
+                    let embed = new EmbedBuilder()
                     .setTitle('Upcoming exams')
                     .setColor(confs[i].embedcolor)
                     const exams = db
                     .prepare('SELECT * FROM exams WHERE guildid = ?')
                     .all(confs[i].guildid)
-                    nm = ''
-                    val = ''
-                    const ping = '@everyon3'
-                    fieldscnt = 0
-                    charcnt = 0
-                    result = []
-                    sendmsg = false
-                    for(let j = 0; j < exams.length; j++){
-                        const examtime = new Date(exams[j].year, exams[j].month, exams[j].day, confs[i].hour, confs[i].minute, 0)
-                        const remindtime = new Date(exams[j].year, exams[j].month, exams[j].day - confs[i].inadvance, confs[i].hour, confs[i].minute, 0)
+                    let nm = ''
+                    let val = ''
+                    let pingeveryone = false
+                    let fieldscnt = 0
+                    let charcnt = 0
+                    let result = []
+                    let sendmsg = false
+                    for (const exam of exams) {
+                        const examtime = new Date(exam.year, exam.month, exam.day, confs[i].hour, confs[i].minute, 0)
+                        const remindtime = new Date(exam.year, exam.month, exam.day - confs[i].inadvance, confs[i].hour, confs[i].minute, 0)
                         const now = new Date()
-                        if (remindtime.getTime() <= now.getTime() && (exams[j].notifiedabout === 0)) {
+                        if (remindtime.getTime() <= now.getTime() && (exam.notifiedabout === 0)) {
                             sendmsg = true
-                            nm = `${exams[j].type} in ${exams[j].subject} on ${exams[j].year > new Date().getFullYear() ? `${exams[j].year}.` : ''}${exams[j].month < 9 ? '0' : ''}${exams[j].month + 1}.${exams[j].day < 10 ? '0' : ''}${exams[j].day}.`
-                            val = exams[j].topic || ''
+                            nm = `${exam.type} in ${exam.subject} on ${exam.year > new Date().getFullYear() ? `${exam.year}.` : ''}${exam.month < 9 ? '0' : ''}${exam.month + 1}.${exam.day < 10 ? '0' : ''}${exam.day}.`
+                            val = `${exam.topic || ''}\n${await listRoles({roles: exam.roles, ping: true})}`
+                            if(exam.roles === ''){
+                                pingeveryone = true
+                            }
                             if(fieldscnt === 25 || charcnt + nm.length + val.length > 6000){
                                 result.push(embed)
                                 embed = new EmbedBuilder()
@@ -111,17 +115,17 @@ function reminder() {
                             }
                             db
                             .prepare('UPDATE exams SET notifiedabout = ? WHERE id = ?')
-                            .run(1, exams[j].id)
+                            .run(1, exam.id)
                         }
                         if (now.getTime() > examtime.getTime()){
                             db
                             .prepare('DELETE FROM exams WHERE id = ?')
-                            .run(exams[j].id)
+                            .run(exam.id)
                         }
                     }
                     if(sendmsg){
                         result.push(embed)
-                        client.channels.cache.get(confs[i].channelid).send({content: ping, embeds: [result[0]]})
+                        client.channels.cache.get(confs[i].channelid).send({content: pingeveryone ? '@everyone' : undefined, embeds: [result[0]]})
                         for (let j = 1; j < result.length; j++) {
                             client.channels.cache.get(confs[i].channelid).send({embeds: [result[j]]})
                         }

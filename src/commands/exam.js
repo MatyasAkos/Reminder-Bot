@@ -1,8 +1,9 @@
 const { EmbedBuilder } = require('@discordjs/builders')
 const Database = require('better-sqlite3')
+const { listRoles } = require('../other')
 const db = new Database('database.db', {fileMustExist: true})
 
-function exam(interaction){
+async function exam(interaction){
     const maxexam = 50
     const subjectlen = 30
     const typelen = 30
@@ -14,8 +15,9 @@ function exam(interaction){
     const isnottoolongsubjectlen = interaction.options.get('subject').value.length <= subjectlen
     const isnottoolongtypelen = interaction.options.get('type').value.length <= typelen
     const isnottoolongtopiclen = (interaction.options.get('topic')?.value || '').length <= topiclen
+    const isvalidroles = /^(<@&\d+> ?)+$/.test(interaction.options.get('special_roles')?.value || '<@&0>')
 
-    embed = new EmbedBuilder()
+    let embed = new EmbedBuilder()
 
     if (!isnottoomanyexams){
         embed.addFields({
@@ -47,14 +49,21 @@ function exam(interaction){
             value: `Topic longer than ${topiclen} characters!`
         })
     }
-    if (isnottoomanyexams && isvaliddate && isnottoolongsubjectlen && isnottoolongtypelen && isnottoolongtopiclen){
+    if (!isvalidroles){
+        embed.addFields({
+            name: 'Invalid list of roles',
+            value: 'List of roles did not match the specification'
+        })
+    }
+    if (isnottoomanyexams && isvaliddate && isnottoolongsubjectlen && isnottoolongtypelen && isnottoolongtopiclen && isvalidroles){
         const now = new Date()
         const time = db
         .prepare('SELECT inadvance, hour, minute FROM servers WHERE guildid = ?')
         .get(interaction.guildId)
         const notifytime = new Date(date.getFullYear(), date.getMonth(), date.getDate() - time.inadvance, time.hour, time.minute, 0)
+        const rolescsv = toCsv(interaction.options.get('special_roles')?.value)
         db
-        .prepare('INSERT INTO exams (year, month, day, subject, type, topic, notifiedabout, guildid) VALUES (@year, @month, @day, @subject, @type, @topic, @notifiedabout, @guildid)')
+        .prepare('INSERT INTO exams (year, month, day, subject, type, topic, notifiedabout, guildid, roles) VALUES (@year, @month, @day, @subject, @type, @topic, @notifiedabout, @guildid, @roles)')
         .run({
             year: date.getFullYear(),
             month: date.getMonth(),
@@ -63,7 +72,8 @@ function exam(interaction){
             type: interaction.options.get('type').value,
             topic: interaction.options.get('topic')?.value || '',
             notifiedabout: now.getTime() > notifytime.getTime() ? 1 : 0,
-            guildid: interaction.guildId
+            guildid: interaction.guildId,
+            roles: rolescsv
         })
         embed
         .setColor(0x00C000)
@@ -80,12 +90,18 @@ function exam(interaction){
             {
                 name: 'subject',
                 value: interaction.options.get('subject').value
-            }
+            },
         )
         if(interaction.options.get('topic') !== null){  
             embed.addFields({
                 name: 'topic',
                 value: interaction.options.get('topic').value
+            })
+        }
+        if(interaction.options.get('special_roles') !== null){  
+            embed.addFields({
+                name: 'pings',
+                value: await listRoles({roles: rolescsv, ping: false, guild: interaction.guild})
             })
         }
     }
@@ -102,11 +118,11 @@ function toDate(datestr){
     if (!/^(\d{2}\.){2}$/.test(datestr)){
         return null
     }
-    today = new Date()
-    m = parseInt(parseInt(datestr.slice(0, 2))) - 1
-    d = parseInt(parseInt(datestr.slice(3, 5)))
-    y = today.getFullYear()
-    date = new Date(y, m, d)
+    const today = new Date()
+    const m = parseInt(parseInt(datestr.slice(0, 2))) - 1
+    const d = parseInt(parseInt(datestr.slice(3, 5)))
+    const y = today.getFullYear()
+    let date = new Date(y, m, d)
     if (y === date.getFullYear() && m === date.getMonth() && d === date.getDate()){
         if(today.getMonth() > date.getMonth() || (today.getMonth() === date.getMonth() && today.getDate() > date.getDate())){
             date = new Date(y + 1, m, d)
@@ -116,4 +132,19 @@ function toDate(datestr){
     else{
         return null
     }
+}
+
+function toCsv(string){
+    const list = string?.match(/<@&\d+>/g)
+    if (list === undefined){
+        return ''
+    }
+    let result = ''
+    for (let i = 0; i < list.length; i++) {
+        result += list[i].match(/\d+/)
+        if (i < (list.length - 1)){
+            result += ','
+        }
+    }
+    return result
 }

@@ -11,11 +11,11 @@ fs.access('database.db', (err) => {
         db.exec(`
             CREATE TABLE servers
             (
-                guildid VARCHAR(25) NOT NULL PRIMARY KEY,
+                guildid TEXT NOT NULL PRIMARY KEY,
                 hour INTEGER NOT NULL,
                 minute INTEGER NOT NULL,
                 inadvance INTEGER NOT NULL,
-                channelid VARCHAR(25) NOT NULL,
+                channelid TEXT NOT NULL,
                 embedcolor INTEGER NOT NULL
             );
             CREATE TABLE exams
@@ -24,11 +24,12 @@ fs.access('database.db', (err) => {
                 year INTEGER NOT NULL,
                 month INTEGER NOT NULL,
                 day INTEGER NOT NULL,
-                subject VARCHAR(30) NOT NULL,
-                type VARCHAR(30) NOT NULL,
-                topic VARCHAR(256) NOT NULL,
+                subject TEXT NOT NULL,
+                type TEXT NOT NULL,
+                topic TEXT NOT NULL,
                 notifiedabout INTEGER NOT NULL CHECK (notifiedabout IN (0, 1)),
-                guildid VARCHAR(25) NOT NULL REFERENCES servers(guildid) ON DELETE CASCADE
+                guildid TEXT NOT NULL REFERENCES servers(guildid) ON DELETE CASCADE,
+                roles TEXT NOT NULL
             );
         `)
         console.log('Successfully created database!')

@@ -1,5 +1,6 @@
 const Database = require('better-sqlite3');
 const { EmbedBuilder } = require('discord.js');
+const { listRoles } = require('../other');
 const db = new Database('database.db', {fileMustExist: true, readonly: true})
 
 async function list(interaction, client){
@@ -18,18 +19,18 @@ async function list(interaction, client){
     }
     else{
         const title = 'List of exams'
-        embed = new EmbedBuilder()
+        let embed = new EmbedBuilder()
         .setTitle(title)
         .setColor(conf.embedcolor)
-        fieldscnt = 0
-        charcnt = title.length
-        nm = ''
-        val = ''
-        result = []
+        let fieldscnt = 0
+        let charcnt = title.length
+        let nm = ''
+        let val = ''
+        let result = []
         await client.channels.fetch(interaction.channelId)
         for (let i = 0; i < exams.length; i++) {
             nm = `${i + 1}. ${exams[i].type} in ${exams[i].subject} on ${exams[i].year > new Date().getFullYear() ? `${exams[i].year}.` : ''}${exams[i].month < 9 ? '0' : ''}${exams[i].month + 1}.${exams[i].day < 10 ? '0' : ''}${exams[i].day}.`
-            val = exams[i].topic || ''
+            val = `${exams[i].topic || ''}\n${await listRoles({roles: exams[i].roles, ping: false, guild: interaction.guild})}`
             if(fieldscnt === 25 || charcnt + nm.length + val.length > 6000){
                 result.push(embed)
                 embed = new EmbedBuilder()

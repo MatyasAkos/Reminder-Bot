@@ -8,8 +8,8 @@ function config(interaction, rowexists){
     const isvalidtime = /^((2[0-3])|([01]\d)):[0-5]\d$/.test(time)
     const embedcolor = interaction.options.get('embedcolor')?.value
     const inadvance = interaction.options.get('days_in_advance')?.value
-    iserror = false
-    embed = new EmbedBuilder()
+    let iserror = false
+    let embed = new EmbedBuilder()
     if (time !== undefined && !isvalidtime){
         embed.addFields({
             name: 'Invalid time',

@@ -40,6 +40,12 @@ const commands = [
                 description: 'The topic of the exam.',
                 type: ApplicationCommandOptionType.String,
                 required: false
+            },
+            {
+                name: 'special_roles',
+                description: 'Multiple roles can be specified by writing them one after the other.',
+                type: ApplicationCommandOptionType.String,
+                required: false
             }
         ]
     },
