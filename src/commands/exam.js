@@ -17,7 +17,7 @@ async function exam(interaction, client){
     const isnottoolongtypelen = interaction.options.get('type').value.length <= typelen
     const isnottoolongtopiclen = (interaction.options.get('topic')?.value || '').length <= topiclen
     const isvalidpings = /^<@&?\d{1,25}>( <@&?\d{1,25}>)*$/.test(interaction.options.get('special_pings')?.value || '<@&0>')
-    const isnottoomanypings = interaction.options.get('special_pings')?.value.match(/<@&?\d+>/g).length <= maxpings
+    const isnottoomanypings = interaction.options.get('special_pings')?.value.match(/<@&?\d+>/g).length ?? 0 <= maxpings
 
     let embed = new EmbedBuilder()
 
@@ -63,7 +63,7 @@ async function exam(interaction, client){
             value: `A maximum of ${maxpings} special pings can be specified`
         })
     }
-    if (isnottoomanyexams && isvaliddate && isnottoolongsubjectlen && isnottoolongtypelen && isnottoolongtopiclen && isvalidpings){
+    if (isnottoomanyexams && isvaliddate && isnottoolongsubjectlen && isnottoolongtypelen && isnottoolongtopiclen && isvalidpings && isnottoomanypings){
         const now = new Date()
         const time = db
         .prepare('SELECT inadvance, hour, minute FROM servers WHERE guildid = ?')
