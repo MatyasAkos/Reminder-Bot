@@ -12,7 +12,8 @@ const Database = require('better-sqlite3')
 const { channelExists, listPings } = require('./other')
 const client = new Client({
     intents: [
-        IntentsBitField.Flags.Guilds]
+        IntentsBitField.Flags.Guilds
+    ]
 })
 const db = new Database('database.db', {fileMustExist: true})
 const timeout = process.env.TIMEOUT
@@ -41,7 +42,7 @@ client.on('interactionCreate', (interaction) => {
                 interaction.reply({embeds: [embed]})
             }
             else if (interaction.commandName === 'exam'){
-                exam(interaction)
+                exam(interaction, client)
             }
             else if(interaction.commandName === 'list'){
                 list(interaction, client)
@@ -96,7 +97,7 @@ function reminder() {
                         if (remindtime.getTime() <= now.getTime() && (exam.notifiedabout === 0)) {
                             sendmsg = true
                             nm = `${exam.type} in ${exam.subject} on ${exam.year > new Date().getFullYear() ? `${exam.year}.` : ''}${exam.month < 9 ? '0' : ''}${exam.month + 1}.${exam.day < 10 ? '0' : ''}${exam.day}.`
-                            const pingslist = await listPings({pings: exam.pings, ping: true, guild: client.guilds.cache.get(exam.guildid)})
+                            const pingslist = await listPings({pings: exam.pings, ping: true, guild: client.guilds.cache.get(exam.guildid), client: client})
                             val = `${exam.topic || ''}\n${pingslist}`
                             if(pingslist === ''){
                                 pingeveryone = true

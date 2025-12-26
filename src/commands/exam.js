@@ -3,7 +3,7 @@ const Database = require('better-sqlite3')
 const { listPings } = require('../other')
 const db = new Database('database.db', {fileMustExist: true})
 
-async function exam(interaction){
+async function exam(interaction, client){
     const maxexam = 50
     const subjectlen = 30
     const typelen = 30
@@ -16,7 +16,7 @@ async function exam(interaction){
     const isnottoolongsubjectlen = interaction.options.get('subject').value.length <= subjectlen
     const isnottoolongtypelen = interaction.options.get('type').value.length <= typelen
     const isnottoolongtopiclen = (interaction.options.get('topic')?.value || '').length <= topiclen
-    const isvalidpings = /^(<@&\d{1,25}>)( <@&\d{1,25}>)*$/.test(interaction.options.get('special_pings')?.value || '<@&0>')
+    const isvalidpings = /^(<@&?\d{1,25}>)( <@&?\d{1,25}>)*$/.test(interaction.options.get('special_pings')?.value || '<@&0>')
     const isnottoomanypings = interaction.options.get('special_pings')?.value.match(/<@&\d+>/g).length <= maxpings
 
     let embed = new EmbedBuilder()
@@ -109,7 +109,7 @@ async function exam(interaction){
         if(interaction.options.get('special_pings') !== null){  
             embed.addFields({
                 name: 'pings',
-                value: await listPings({pings: pingscsv, ping: false, guild: interaction.guild})
+                value: await listPings({pings: pingscsv, ping: false, guild: interaction.guild, client: client})
             })
         }
     }
@@ -143,13 +143,13 @@ function toDate(datestr){
 }
 
 function toCsv(string){
-    const list = string?.match(/<@&\d+>/g)
+    const list = string?.match(/<@&?\d+>/g)
     if (list === undefined){
         return ''
     }
     let result = ''
     for (let i = 0; i < list.length; i++) {
-        result += list[i].match(/&\d+/)
+        result += list[i].match(/&?\d+/)
         if (i < (list.length - 1)){
             result += ','
         }

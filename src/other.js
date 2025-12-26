@@ -23,12 +23,25 @@ async function listPings(args){
         return ''
     }
     for (const pingid of pingsarr) {
-        if (args.guild.pings.cache.find(x => x.id === pingid) !== undefined){
+        console.log(pingid)
+        if (pingid.slice(0, 1) === '&'){
+            const roleid = pingid.slice(1, pingid.length)
+            if (args.guild.roles.cache.find(x => x.id === roleid) !== undefined){
+                if(args.ping){
+                    result += `<@${pingid}> `
+                }
+                else{
+                    result += `@${args.guild.roles.cache.get(roleid).name} `
+                }
+            }
+        }
+        else{
             if(args.ping){
-                result += `<@&${pingid}> `
+                result += `<@${pingid}> `
             }
             else{
-                result += `@${args.guild.pings.cache.get(pingid).name} `
+                const user = await args.client.users.fetch(pingid)
+                result += `@${user.globalName ?? user.username} `
             }
         }
     }
