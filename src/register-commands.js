@@ -22,16 +22,6 @@ const commands = [
             {
                 name: 'type',
                 description: 'The type of exam.',
-                choices: [
-                    {
-                        name: 'Röpdolgozat',
-                        value: 'röpi'
-                    },
-                    {
-                        name: 'Témazáró',
-                        value: 'TZ'
-                    },
-                ],
                 type: ApplicationCommandOptionType.String,
                 required: true
             },
