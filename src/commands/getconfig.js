@@ -1,6 +1,6 @@
 const Database = require('better-sqlite3')
 const { EmbedBuilder } = require('discord.js')
-const { spam } = require('../other')
+const { spam } = require('../misc')
 const db = new Database('database.db', {fileMustExist: true})
 
 function getconfig(interaction){

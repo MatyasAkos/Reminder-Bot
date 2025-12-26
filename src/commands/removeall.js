@@ -1,6 +1,5 @@
 const Database = require('better-sqlite3')
 const { EmbedBuilder } = require('discord.js')
-const fs = require('fs')
 const db = new Database('database.db', {fileMustExist: true})
 
 function removeall(interaction){

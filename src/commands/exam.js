@@ -1,6 +1,6 @@
 const { EmbedBuilder } = require('@discordjs/builders')
 const Database = require('better-sqlite3')
-const { listPings } = require('../other')
+const { listPings } = require('../misc')
 const db = new Database('database.db', {fileMustExist: true})
 
 async function exam(interaction, client){

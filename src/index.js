@@ -9,7 +9,7 @@ const { getconfig } = require('./commands/getconfig')
 const { removeall } = require('./commands/removeall')
 const { reset } = require('./commands/reset')
 const Database = require('better-sqlite3')
-const { channelExists, listPings } = require('./other')
+const { channelExists, listPings } = require('./misc')
 const client = new Client({
     intents: [
         IntentsBitField.Flags.Guilds

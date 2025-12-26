@@ -1,6 +1,6 @@
 const Database = require('better-sqlite3');
 const { EmbedBuilder } = require('discord.js');
-const { listPings } = require('../other');
+const { listPings } = require('../misc');
 const db = new Database('database.db', {fileMustExist: true, readonly: true})
 
 async function list(interaction, client){
