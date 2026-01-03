@@ -1,3 +1,4 @@
+require('./migrate.js')
 require('dotenv').config()
 const {Client, EmbedBuilder, IntentsBitField} = require('discord.js')
 const { help } = require('./commands/help')
