@@ -10,3 +10,5 @@ This bot reminds the server about upcoming exams at a specified time, a certain 
 - **/remove**: Removes the exam with the specified id.
 - **/removeall**: Removes all exams.
 - **/reset**: Removes and deletes the configs.
+- **/manageroles:** Allows you to manage what roles can use what commands.
+- **/listroles:** Lists what roles can use what commands.

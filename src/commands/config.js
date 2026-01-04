@@ -76,7 +76,7 @@ function config(interaction, rowexists){
         }
         else{
             db
-            .prepare('INSERT INTO servers VALUES (@guildid, @hour, @minute, @inadvance, @channelid, @embedcolor)')
+            .prepare('INSERT INTO servers VALUES (@guildid, @hour, @minute, @inadvance, @channelid, @embedcolor, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL)')
             .run(values)
         }
         const newvalues = db

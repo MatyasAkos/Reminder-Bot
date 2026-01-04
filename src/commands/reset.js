@@ -2,7 +2,7 @@ const Database = require('better-sqlite3')
 const { EmbedBuilder } = require('discord.js')
 const db = new Database('database.db')
 
-function reset(interaction, path){
+function reset(interaction){
     db
     .prepare('DELETE FROM servers WHERE guildid = ?')
     .run(interaction.guildId)

@@ -3,7 +3,8 @@ const fs = require('fs')
 
 if (fs.existsSync('database.db')) {
     console.log('Database already exists! Skipping database creation...')
-} else {
+}
+else {
     console.log('Creating database...')
     const db = new Database('database.db')
     db.exec(`
@@ -14,7 +15,17 @@ if (fs.existsSync('database.db')) {
             minute INTEGER NOT NULL,
             inadvance INTEGER NOT NULL,
             channelid TEXT NOT NULL,
-            embedcolor INTEGER NOT NULL
+            embedcolor INTEGER NOT NULL,
+            config TEXT,
+            exam TEXT,
+            getconfig TEXT,
+            help TEXT,
+            list TEXT,
+            listroles TEXT,
+            manageroles TEXT,
+            remove TEXT,
+            removeall TEXT,
+            reset TEXT
         );
 
         CREATE TABLE exams 

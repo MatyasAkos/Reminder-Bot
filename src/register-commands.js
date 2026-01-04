@@ -94,7 +94,71 @@ const commands = [
     {
         name: 'reset',
         description: 'Resets and deletes the configs.'
-    }
+    },
+    {
+        name: 'manageroles',
+        description: 'Lets the admins set which commands can be run by what roles (including @everyone or admin).',
+        options: [
+            {
+                name: 'config',
+                description: 'Who can use /config.',
+                type: ApplicationCommandOptionType.String,
+                required: false
+            },
+            {
+                name: 'exam',
+                description: 'Who can use /exam.',
+                type: ApplicationCommandOptionType.String,
+                required: false
+            },
+            {
+                name: 'getconfig',
+                description: 'Who can use /getconfig.',
+                type: ApplicationCommandOptionType.String,
+                required: false
+            },
+            {
+                name: 'help',
+                description: 'Who can use /help.',
+                type: ApplicationCommandOptionType.String,
+                required: false
+            },
+            {
+                name: 'list',
+                description: 'Who can use /list.',
+                type: ApplicationCommandOptionType.String,
+                required: false
+            },
+            {
+                name: 'manageroles',
+                description: 'Who can use /manageroles.',
+                type: ApplicationCommandOptionType.String,
+                required: false
+            },
+            {
+                name: 'remove',
+                description: 'Who can use /remove.',
+                type: ApplicationCommandOptionType.String,
+                required: false
+            },
+            {
+                name: 'removeall',
+                description: 'Who can use /removeall.',
+                type: ApplicationCommandOptionType.String,
+                required: false
+            },
+            {
+                name: 'reset',
+                description: 'Who can use /reset.',
+                type: ApplicationCommandOptionType.String,
+                required: false
+            }
+        ]
+    },
+    {
+        name: 'listroles',
+        description: 'Lists all commands and what roles can use them.'
+    },
 ]
 
 const rest = new REST({ version: '10' }).setToken(process.env.TOKEN);

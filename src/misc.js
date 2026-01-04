@@ -1,3 +1,5 @@
+const { PermissionsBitField } = require("discord.js")
+
 function spam(string, times){
     let result = ''
     for (let i = 0; i < times; i++) {
@@ -47,4 +49,20 @@ async function listPings(args){
     return result
 }
 
-module.exports = {spam, channelExists, listPings: listPings}
+function isPermitted(args){
+    if (args.member.permissions.has(PermissionsBitField.Flags.Administrator)){
+        return true
+    }
+    else if (args.rowexists){
+        const roleid = args.db
+        .prepare(`SELECT ${args.command} AS role FROM servers WHERE guildid = ?`)
+        .get(args.guildid)
+        .role
+        return roleid !== null && (roleid === '@everyone' || args.member.roles.cache.has(roleid))
+    }
+    else{
+        return false
+    }
+}
+
+module.exports = {spam, channelExists, listPings, isPermitted}

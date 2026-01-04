@@ -10,7 +10,9 @@ const { getconfig } = require('./commands/getconfig')
 const { removeall } = require('./commands/removeall')
 const { reset } = require('./commands/reset')
 const Database = require('better-sqlite3')
-const { channelExists, listPings } = require('./misc')
+const { channelExists, listPings, isPermitted } = require('./misc')
+const { manageroles } = require('./commands/manageroles.js')
+const { listroles } = require('./commands/listroles.js')
 const client = new Client({
     intents: [
         IntentsBitField.Flags.Guilds
@@ -23,16 +25,17 @@ client.on('clientReady', () => {
     reminder()
 })
 
-client.on('interactionCreate', (interaction) => {
+client.on('interactionCreate', async (interaction) => {
     if(interaction.isChatInputCommand()){
-        if (interaction.commandName === 'help'){
-            help(interaction)
-        }
-        else{
-            const rowexists = db
-            .prepare('SELECT COUNT(*) AS value FROM servers WHERE guildid = ?')
-            .get(interaction.guildId).value === 1
-            if (interaction.commandName === 'config'){
+        const rowexists = db
+        .prepare('SELECT COUNT(*) AS value FROM servers WHERE guildid = ?')
+        .get(interaction.guildId).value === 1
+        const member = await interaction.guild.members.fetch(interaction.user.id)
+        if (isPermitted({member: member, db: db, command: interaction.commandName, guildid: interaction.guildId, rowexists: rowexists})){
+            if (interaction.commandName === 'help'){
+                help(interaction)
+            }
+            else if (interaction.commandName === 'config'){
                 config(interaction, rowexists)
             }
             else if (!rowexists){
@@ -60,6 +63,19 @@ client.on('interactionCreate', (interaction) => {
             else if(interaction.commandName === 'reset'){
                 reset(interaction)
             }
+            else if(interaction.commandName === 'manageroles'){
+                manageroles(interaction)
+            }
+            else if(interaction.commandName === 'listroles'){
+                listroles(interaction)
+            }
+        }
+        else{
+            const embed = new EmbedBuilder()
+            .setTitle('Permission denied!')
+            .setColor(0xD80000)
+            .setDescription('Sorry, you don\'t have the nescessary permissions to run this command')
+            interaction.reply({embeds: [embed]})
         }
     }
 })
