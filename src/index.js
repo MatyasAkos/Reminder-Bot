@@ -8,6 +8,7 @@ const { list } = require('./commands/list')
 const { remove } = require('./commands/remove')
 const { getconfig } = require('./commands/getconfig')
 const { removeall } = require('./commands/removeall')
+const { showCalendar } = require('./commands/calendar')
 const { reset } = require('./commands/reset')
 const Database = require('better-sqlite3')
 const { channelExists, listPings } = require('./misc')
@@ -24,6 +25,24 @@ client.on('clientReady', () => {
 })
 
 client.on('interactionCreate', (interaction) => {
+    if (interaction.isButton()) {
+        if (!interaction.customId.startsWith("cal_")) return
+
+        let [, dir, year, month] = interaction.customId.split("_")
+
+        year = Number(year)
+        month = Number(month)
+
+        if (dir === "prev") month--
+        if (dir === "next") month++
+
+        if (month < 0) { month = 11; year-- }
+        if (month > 11) { month = 0; year++ }
+
+        const calendar = require("./commands/calendar")
+        calendar.showCalendar(interaction, year, month)
+        }
+        
     if(interaction.isChatInputCommand()){
         if (interaction.commandName === 'help'){
             help(interaction)
@@ -59,6 +78,9 @@ client.on('interactionCreate', (interaction) => {
             }
             else if(interaction.commandName === 'reset'){
                 reset(interaction)
+            }
+            else if(interaction.commandName === 'calendar'){
+                showCalendar(interaction)
             }
         }
     }

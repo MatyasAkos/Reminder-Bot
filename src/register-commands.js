@@ -94,6 +94,10 @@ const commands = [
     {
         name: 'reset',
         description: 'Resets and deletes the configs.'
+    },
+    {
+        name: 'calendar',
+        description: 'A cleaner way to see your duties.'
     }
 ]
 
