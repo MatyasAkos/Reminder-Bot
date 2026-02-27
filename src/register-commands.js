@@ -165,6 +165,48 @@ const commands = [
         name: 'listroles',
         description: 'Lists all commands and what roles can use them.'
     },
+    {
+        name: 'edit',
+        description: 'Reminds you of the exam the specified date and time.',
+        options: [
+            {
+                name: 'id',
+                description: 'The id of the exam to edit.',
+                type: ApplicationCommandOptionType.Integer,
+                required: true
+            },
+            {
+                name: 'date',
+                description: '(MM.DD.)',
+                type: ApplicationCommandOptionType.String,
+                required: false
+            },
+            {
+                name: 'subject',
+                description: 'The subject of the class.',
+                type: ApplicationCommandOptionType.String,
+                required: false
+            },
+            {
+                name: 'type',
+                description: 'The type of exam.',
+                type: ApplicationCommandOptionType.String,
+                required: false
+            },
+            {
+                name: 'topic',
+                description: 'The topic of the exam.',
+                type: ApplicationCommandOptionType.String,
+                required: false
+            },
+            {
+                name: 'special_pings',
+                description: 'Multiple pings can be specified by writing them one after the other.',
+                type: ApplicationCommandOptionType.String,
+                required: false
+            }
+        ]
+    },
 ]
 
 const rest = new REST({ version: '10' }).setToken(process.env.TOKEN);

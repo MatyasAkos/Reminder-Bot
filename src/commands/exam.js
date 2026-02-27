@@ -1,6 +1,6 @@
 const { EmbedBuilder } = require('@discordjs/builders')
 const Database = require('better-sqlite3')
-const { listPings } = require('../misc')
+const { listPings, toDate, toCsv } = require('../misc')
 const db = new Database('database.db', {fileMustExist: true})
 
 async function exam(interaction, client){
@@ -121,38 +121,3 @@ async function exam(interaction, client){
     interaction.reply({embeds: [embed]})
 }
 module.exports = {exam}
-
-function toDate(datestr){
-    if (!/^(\d{2}\.){2}$/.test(datestr)){
-        return null
-    }
-    const today = new Date()
-    const m = parseInt(parseInt(datestr.slice(0, 2))) - 1
-    const d = parseInt(parseInt(datestr.slice(3, 5)))
-    const y = today.getFullYear()
-    let date = new Date(y, m, d)
-    if (y === date.getFullYear() && m === date.getMonth() && d === date.getDate()){
-        if(today.getMonth() > date.getMonth() || (today.getMonth() === date.getMonth() && today.getDate() > date.getDate())){
-            date = new Date(y + 1, m, d)
-        }
-        return date
-    }
-    else{
-        return null
-    }
-}
-
-function toCsv(string){
-    const list = string?.match(/<@&?\d+>/g)
-    if (list === undefined){
-        return ''
-    }
-    let result = ''
-    for (let i = 0; i < list.length; i++) {
-        result += list[i].match(/&?\d+/)
-        if (i < (list.length - 1)){
-            result += ','
-        }
-    }
-    return result
-}

@@ -20,11 +20,21 @@ function channelExists(client, channelid) {
 
 async function listPings(args){
     let result = ''
-    const pingsarr = args.pings.split(',')
+    console.log(args.pings)
+    let pingsarr
+    if (typeof args.pings === 'string'){
+        pingsarr = args.pings.split(',')
+    }
+    else{
+        pingsarr = args.pings
+    }
     if (pingsarr[0] === ''){
         return ''
     }
-    for (const pingid of pingsarr) {
+    for (let pingid of pingsarr) {
+        if (pingid.slice(0, 1) === '<'){
+            pingid = pingid.slice(2, pingid.length - 1)
+        }
         if (pingid.slice(0, 1) === '&'){
             const roleid = pingid.slice(1, pingid.length)
             if (args.guild.roles.cache.find(x => x.id === roleid) !== undefined){
@@ -65,4 +75,39 @@ function isPermitted(args){
     }
 }
 
-module.exports = {spam, channelExists, listPings, isPermitted}
+function toDate(datestr){
+    if (!/^(\d{2}\.){2}$/.test(datestr)){
+        return null
+    }
+    const today = new Date()
+    const m = parseInt(parseInt(datestr.slice(0, 2))) - 1
+    const d = parseInt(parseInt(datestr.slice(3, 5)))
+    const y = today.getFullYear()
+    let date = new Date(y, m, d)
+    if (y === date.getFullYear() && m === date.getMonth() && d === date.getDate()){
+        if(today.getMonth() > date.getMonth() || (today.getMonth() === date.getMonth() && today.getDate() > date.getDate())){
+            date = new Date(y + 1, m, d)
+        }
+        return date
+    }
+    else{
+        return null
+    }
+}
+
+function toCsv(string){
+    const list = string?.match(/<@&?\d+>/g)
+    if (list === undefined){
+        return ''
+    }
+    let result = ''
+    for (let i = 0; i < list.length; i++) {
+        result += list[i].match(/&?\d+/)
+        if (i < (list.length - 1)){
+            result += ','
+        }
+    }
+    return result
+}
+
+module.exports = {spam, channelExists, listPings, isPermitted, toDate, toCsv}

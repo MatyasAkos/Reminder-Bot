@@ -30,6 +30,7 @@ async function list(interaction, client){
         await client.channels.fetch(interaction.channelId)
         for (let i = 0; i < exams.length; i++) {
             nm = `${i + 1}. ${exams[i].type} in ${exams[i].subject} on ${exams[i].year > new Date().getFullYear() ? `${exams[i].year}.` : ''}${exams[i].month < 9 ? '0' : ''}${exams[i].month + 1}.${exams[i].day < 10 ? '0' : ''}${exams[i].day}.`
+            console.log(exams)
             val = `${exams[i].topic || ''}\n${await listPings({pings: exams[i].pings, ping: false, guild: interaction.guild, client: client})}`
             if(fieldscnt === 25 || charcnt + nm.length + val.length > 6000){
                 result.push(embed)

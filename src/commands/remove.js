@@ -4,8 +4,8 @@ const db = new Database('database.db', {fileMustExist: true})
 
 function remove(interaction){
     const examcnt = db
-    .prepare('SELECT COUNT(*) FROM exams WHERE guildid = ?')
-    .get(interaction.guildId)
+    .prepare('SELECT COUNT(*) AS cnt FROM exams WHERE guildid = ?')
+    .get(interaction.guildId).cnt
     if(examcnt === 0){
         const embed = new EmbedBuilder()
         .setColor(0xD80000)

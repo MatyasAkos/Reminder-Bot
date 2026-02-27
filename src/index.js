@@ -13,6 +13,7 @@ const Database = require('better-sqlite3')
 const { channelExists, listPings, isPermitted } = require('./misc')
 const { manageroles } = require('./commands/manageroles.js')
 const { listroles } = require('./commands/listroles.js')
+const { edit } = require('./commands/edit.js')
 const client = new Client({
     intents: [
         IntentsBitField.Flags.Guilds
@@ -68,6 +69,9 @@ client.on('interactionCreate', async (interaction) => {
             }
             else if(interaction.commandName === 'listroles'){
                 listroles(interaction)
+            }
+            else if(interaction.commandName === 'edit'){
+                edit(interaction, client)
             }
         }
         else{
