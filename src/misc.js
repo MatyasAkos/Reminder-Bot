@@ -20,7 +20,6 @@ function channelExists(client, channelid) {
 
 async function listPings(args){
     let result = ''
-    console.log(args.pings)
     let pingsarr
     if (typeof args.pings === 'string'){
         pingsarr = args.pings.split(',')
@@ -44,6 +43,9 @@ async function listPings(args){
                 else{
                     result += `@${args.guild.roles.cache.get(roleid).name} `
                 }
+            }
+            else{
+                result += `<@${pingid}> `
             }
         }
         else{
@@ -111,12 +113,8 @@ function toCsv(string){
 }
 
 async function isValidPing(ping, guild, client){
-    console.log(`todays ping: ${ping}`)
     try{
-        if (ping[0] === '&'){
-            guild.roles.cache.get(ping)
-        }
-        else{
+        if (ping[0] !== '&'){
             await client.users.fetch(ping)
         }
         return true
