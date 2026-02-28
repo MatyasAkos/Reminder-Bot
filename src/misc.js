@@ -112,7 +112,7 @@ function toCsv(string){
     return result
 }
 
-async function isValidPing(ping, guild, client){
+async function isValidPing(ping, client){
     try{
         if (ping[0] !== '&'){
             await client.users.fetch(ping)

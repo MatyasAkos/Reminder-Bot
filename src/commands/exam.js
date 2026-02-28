@@ -21,7 +21,7 @@ async function exam(interaction, client){
         const pingarr = interaction.options.get('special_pings').value.split(' ').map(e => e.slice(2, interaction.options.get('special_pings').value.length - 1))
         let i = 0
         while(isvalidpings && i < pingarr.length){
-            isvalidpings = await isValidPing(pingarr[i], interaction.guild, client)
+            isvalidpings = await isValidPing(pingarr[i], client)
             i++
         } 
     }

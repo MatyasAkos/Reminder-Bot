@@ -65,7 +65,15 @@ const commands = [
     },
     {
         name: 'list',
-        description: 'Lists all exams.'
+        description: 'Lists all exams.',
+        options: [
+            {
+                name: 'user',
+                description: 'Only shows exams relevant to this user. \"me\" is an alias for yourself.',
+                type: ApplicationCommandOptionType.String,
+                required: false
+            }
+        ]
     },
     {
         name: 'remove',

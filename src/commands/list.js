@@ -1,6 +1,6 @@
 const Database = require('better-sqlite3');
 const { EmbedBuilder } = require('discord.js');
-const { listPings } = require('../misc');
+const { listPings, isValidPing } = require('../misc');
 const db = new Database('database.db', {fileMustExist: true, readonly: true})
 
 async function list(interaction, client){
@@ -10,60 +10,67 @@ async function list(interaction, client){
     let exams = db
     .prepare('SELECT * FROM exams WHERE guildid = ? ORDER BY year, month, day')
     .all(interaction.guildId)
-    if(exams.length === 0){
+    if (!(interaction.options.get('user') === null || interaction.options.get('user').value === 'me' || (/^<@\d{1,25}>$/.test(interaction.options.get('user')?.value) && await isValidPing(interaction.options.get('user').value.slice(2, interaction.options.get('user').value.length - 1), client)))){
         const embed = new EmbedBuilder()
-        .setColor(conf.embedcolor)
-        .setTitle('No upcoming exams')
-        .setDescription('There are no upcoming exams')
-        interaction.reply({embeds: [embed]})
-    }
-    exams = exams.filter(exam => concernsUser(user, exam.pings.split(',')))
-    if(exams.length === 0){
-        const embed = new EmbedBuilder()
-        .setColor(conf.embedcolor)
-        .setTitle('No upcoming exams')
-        .setDescription('There are no upcoming exams')
+        .setColor(0xD80000)
+        .setTitle('User not found')
+        .setDescription('User doesn\'t exist or the wrong format was used')
         interaction.reply({embeds: [embed]})
     }
     else{
-        const title = 'List of exams'
-        let embed = new EmbedBuilder()
-        .setTitle(title)
-        .setColor(conf.embedcolor)
-        let fieldscnt = 0
-        let charcnt = title.length
-        let nm = ''
-        let val = ''
-        let result = []
-        await client.channels.fetch(interaction.channelId)
-        for (let i = 0; i < exams.length; i++) {
-            nm = `${i + 1}. ${exams[i].type} in ${exams[i].subject} on ${exams[i].year > new Date().getFullYear() ? `${exams[i].year}.` : ''}${exams[i].month < 9 ? '0' : ''}${exams[i].month + 1}.${exams[i].day < 10 ? '0' : ''}${exams[i].day}.`
-            console.log(exams)
-            val = `${exams[i].topic || ''}\n${await listPings({pings: exams[i].pings, ping: false, guild: interaction.guild, client: client})}`
-            if(fieldscnt === 25 || charcnt + nm.length + val.length > 6000){
-                result.push(embed)
-                embed = new EmbedBuilder()
-                .setColor(conf.embedcolor)
-                .addFields({name: nm, value: val})
-                fieldscnt = 0
-                charcnt = nm.length + val.length
-            }
-            else{
-                embed.addFields({name: nm, value: val})
-                charcnt += nm.length + val.length
-                fieldscnt++
-            }
+        if (interaction.options.get('user') !== null){
+            const user = interaction.options.get('user').value === 'me' ? interaction.member : await interaction.guild.members.fetch(interaction.options.get('user').value.slice(2, interaction.options.get('user').value.length - 1))
+            exams = exams.filter(exam => concernsUser(user, exam.pings.split(',')))
         }
-        result.push(embed)
-        interaction.reply({embeds: [result[0]]})
-        for (let i = 1; i < result.length; i++) {
-            client.channels.cache.get(interaction.channelId).send({embeds: [result[i]]})
+        if(exams.length === 0){
+            const embed = new EmbedBuilder()
+            .setColor(conf.embedcolor)
+            .setTitle('No upcoming exams')
+            .setDescription('There are no upcoming exams')
+            interaction.reply({embeds: [embed]})
+        }
+        else{
+            const title = 'List of exams'
+            let embed = new EmbedBuilder()
+            .setTitle(title)
+            .setColor(conf.embedcolor)
+            let fieldscnt = 0
+            let charcnt = title.length
+            let nm = ''
+            let val = ''
+            let result = []
+            await client.channels.fetch(interaction.channelId)
+            for (let i = 0; i < exams.length; i++) {
+                nm = `${i + 1}. ${exams[i].type} in ${exams[i].subject} on ${exams[i].year > new Date().getFullYear() ? `${exams[i].year}.` : ''}${exams[i].month < 9 ? '0' : ''}${exams[i].month + 1}.${exams[i].day < 10 ? '0' : ''}${exams[i].day}.`
+                val = `${exams[i].topic || ''}\n${await listPings({pings: exams[i].pings, ping: false, guild: interaction.guild, client: client})}`
+                if(fieldscnt === 25 || charcnt + nm.length + val.length > 6000){
+                    result.push(embed)
+                    embed = new EmbedBuilder()
+                    .setColor(conf.embedcolor)
+                    .addFields({name: nm, value: val})
+                    fieldscnt = 0
+                    charcnt = nm.length + val.length
+                }
+                else{
+                    embed.addFields({name: nm, value: val})
+                    charcnt += nm.length + val.length
+                    fieldscnt++
+                }
+            }
+            result.push(embed)
+            interaction.reply({embeds: [result[0]]})
+            for (let i = 1; i < result.length; i++) {
+                client.channels.cache.get(interaction.channelId).send({embeds: [result[i]]})
+            }
         }
     }
 }
 module.exports = {list}
 
 function concernsUser(user, pinglist){
+    if (user === undefined || pinglist[0] === ''){
+        return true
+    }
     for (const ping of pinglist) {
         if (ping.slice(0, 1) === '&'){
             if (user.roles.cache.has(ping.slice(1, ping.length))){
