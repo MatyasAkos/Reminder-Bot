@@ -19,51 +19,31 @@ async function exam(interaction, client){
     const isvalidpings = /^<@&?\d{1,25}>( <@&?\d{1,25}>)*$/.test(interaction.options.get('special_pings')?.value || '<@&0>')
     const isnottoomanypings = interaction.options.get('special_pings')?.value?.match(/<@&?\d+>/g)?.length ?? 0 <= maxpings
 
-    let embed = new EmbedBuilder()
+    let errors = ''
 
     if (!isnottoomanyexams){
-        embed.addFields({
-            name: 'Too many exams',
-            value: `You cannot have more than ${maxexam} exams at a time!`
-        })
+        errors += `- You cannot have more than ${maxexam} exams at a time!\n`
     }
     if (!isvaliddate){
-        embed.addFields({
-            name: 'Invalid date',
-            value: `${interaction.options.get('date').value} is not a valid date in the MM.DD. format!`
-        })
+        errors += `${interaction.options.get('date').value} is not a valid date in the MM.DD. format!\n`
     }
     if (!isnottoolongsubjectlen){
-        embed.addFields({
-            name: 'Subject name too long',
-            value: `Subject name longer than ${subjectlen} characters!`
-        })
+        errors += `- Subject name longer than ${subjectlen} characters!\n`
     }
     if (!isnottoolongtypelen){
-        embed.addFields({
-            name: 'Exam type name too long',
-            value: `Exam type name longer than ${typelen} characters!`
-        })
+        errors += `- Exam type name longer than ${typelen} characters!\n`
     }
     if (!isnottoolongtopiclen){
-        embed.addFields({
-            name: 'Topic name too long',
-            value: `Topic longer than ${topiclen} characters!`
-        })
+        errors += `- Topic longer than ${topiclen} characters!\n`
     }
     if (!isvalidpings){
-        embed.addFields({
-            name: 'Invalid list of pings',
-            value: 'List of pings did not match the specification'
-        })
+        errors += '- List of pings did not match the specification\n'
     }
     else if (!isnottoomanypings){
-        embed.addFields({
-            name: 'Too many special pings',
-            value: `A maximum of ${maxpings} special pings can be specified`
-        })
+        errors += `- A maximum of ${maxpings} special pings can be specified\n`
     }
-    if (isnottoomanyexams && isvaliddate && isnottoolongsubjectlen && isnottoolongtypelen && isnottoolongtopiclen && isvalidpings && isnottoomanypings){
+    let embed = new EmbedBuilder()
+    if (errors === ''){
         const now = new Date()
         const time = db
         .prepare('SELECT inadvance, hour, minute FROM servers WHERE guildid = ?')
@@ -83,40 +63,25 @@ async function exam(interaction, client){
             guildid: interaction.guildId,
             pings: pingscsv
         })
+        let result = ''
+        result += `- **Subject:** ${interaction.options.get('subject').value}\n- **Type:** ${interaction.options.get('type').value}\n`
+        if(interaction.options.get('topic') !== null){  
+            result += `- **Topic:** ${interaction.options.get('topic').value}\n`
+        }
+        result += `- **Date:** ${date.getFullYear()}.${date.getMonth() < 9 ? '0' : ''}${date.getMonth() + 1}.${date.getDate() < 10 ? '0' : ''}${date.getDate()}.\n`
+        if(interaction.options.get('special_pings') !== null){  
+            result += `- **Pings:** ${await listPings({pings: pingscsv, ping: false, guild: interaction.guild, client: client})}`
+        }
         embed
         .setColor(0x00C000)
         .setTitle('Successfully added new exam')
-        .addFields(
-            {
-                name: 'type',
-                value: interaction.options.get('type').value
-            },
-            {
-                name: 'date',
-                value: `${date.getFullYear()}.${date.getMonth() < 9 ? '0' : ''}${date.getMonth() + 1}.${date.getDate() < 10 ? '0' : ''}${date.getDate()}.`
-            },
-            {
-                name: 'subject',
-                value: interaction.options.get('subject').value
-            },
-        )
-        if(interaction.options.get('topic') !== null){  
-            embed.addFields({
-                name: 'topic',
-                value: interaction.options.get('topic').value
-            })
-        }
-        if(interaction.options.get('special_pings') !== null){  
-            embed.addFields({
-                name: 'pings',
-                value: await listPings({pings: pingscsv, ping: false, guild: interaction.guild, client: client})
-            })
-        }
+        .setDescription(result)
     }
     else{
         embed
         .setColor(0xD80000)
         .setTitle('Error')
+        .setDescription(errors)
     }
     interaction.reply({embeds: [embed]})
 }

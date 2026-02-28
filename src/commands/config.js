@@ -8,43 +8,19 @@ function config(interaction, rowexists){
     const isvalidtime = /^((2[0-3])|([01]\d)):[0-5]\d$/.test(time)
     const embedcolor = interaction.options.get('embedcolor')?.value
     const inadvance = interaction.options.get('days_in_advance')?.value
-    let iserror = false
-    let embed = new EmbedBuilder()
+    let errors = ''
     if (time !== undefined && !isvalidtime){
-        embed.addFields({
-            name: 'Invalid time',
-            value: `${time} is not a valid time in HH:MM format`
-        })
+        errors += `- **${time}** is not a valid **time** in HH:MM format\n`
     }   
-    const isvalidcolor = /^#(\d|[A-Fa-f]){6}$/.test(embedcolor)
-    if (embedcolor !== undefined && !isvalidcolor){
-        embed.addFields({
-            name: 'Invalid color code',
-            value: `${embedcolor} is not a valid hex color code`
-        })
-        iserror = true
-    }
     if (inadvance !== undefined && inadvance < 0){
-        embed.addFields({
-            name: 'Invalid value for days in advance',
-            value: 'Days in advance mustn\'t be negative'
-        })
-        iserror = true
+        errors += '- **Days in advance** mustn\'t be **negative**\n'
     }
     if (!rowexists){
         if(time === undefined){
-            embed.addFields({
-                name: 'Time not specified',
-                value: 'Time must be specified when first configing the bot'
-            })
-            iserror = true
+            errors += '- **Time** must be specified when first configing the bot\n'
         }
         if(inadvance === undefined){
-            embed.addFields({
-                name: 'Days in advance not specifed',
-                value: 'Days in advance must be specified when first configing the bot'
-            })
-            iserror = true
+            errors += '- **Days in advance** must be specified when first configing the bot\n'
         }
     }
     else{
@@ -53,14 +29,15 @@ function config(interaction, rowexists){
         .get(interaction.guildId)
         .channelid
         if ((time === undefined) && (inadvance === undefined) && (embedcolor === undefined) && (oldchannelid === interaction.channelId)){
-            embed.addFields({
-                name: 'No changes specified',
-                value: 'At least one change should be specified'
-            })
-            iserror = true
+            errors += '- At least one change must be specified\n'
         }
     }
-    if (!iserror){
+    const isvalidcolor = /^#(\d|[A-Fa-f]){6}$/.test(embedcolor)
+    if (embedcolor !== undefined && !isvalidcolor){
+        errors += `- **${embedcolor}** is not a valid hex **color** code\n`
+    }
+    let embed = new EmbedBuilder()
+    if (errors === ''){
         const values = {
             guildid: interaction.guildId,
             hour: parseInt(time?.slice(0, 2)),
@@ -85,12 +62,13 @@ function config(interaction, rowexists){
         embed
         .setColor(0x00C000)
         .setTitle('Config')
-        .setDescription(`Successfully configured bot to send reminders at ${newvalues.hour < 10 ? '0' : ''}${newvalues.hour}:${newvalues.minute < 10 ? '0' : ''}${newvalues.minute}, ${newvalues.inadvance} day${newvalues.inadvance !== 1 ? 's' : ''} in advance, with the color #${spam('0', 6 - newvalues.embedcolor.toString(16).length)}${newvalues.embedcolor.toString(16).toUpperCase()}`)
+        .setDescription(`Successfully configured bot to send reminders at **${newvalues.hour < 10 ? '0' : ''}${newvalues.hour}:${newvalues.minute < 10 ? '0' : ''}${newvalues.minute}**, **${newvalues.inadvance}** day${newvalues.inadvance !== 1 ? 's' : ''} in advance, with the color **#${spam('0', 6 - newvalues.embedcolor.toString(16).length)}${newvalues.embedcolor.toString(16).toUpperCase()}**`)
     }
     else{
         embed
         .setColor(0xD80000)
         .setTitle('Error')
+        .setDescription(errors)
     }
     interaction.reply({embeds: [embed]})
 }

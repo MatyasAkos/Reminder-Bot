@@ -39,9 +39,6 @@ async function edit(interaction, client){
         errors += '- Nothing was provided to change\n'
     }
     else{
-        if (!isvaliddate && interaction.options.get('date') !== null){
-            errors += `- **${interaction.options.get('date').value}** is not a valid **date** in the MM.DD. format!\n`
-        }
         if (!isnottoolongsubjectlen && interaction.options.get('subject') !== null){
             errors += `- **Subject name** longer than **${subjectlen}** characters!\n`
         }
@@ -50,6 +47,9 @@ async function edit(interaction, client){
         }
         if (!isnottoolongtopiclen && interaction.options.get('topic') !== null){
             errors += `- **Topic** longer than **${topiclen}** characters!\n`
+        }
+        if (!isvaliddate && interaction.options.get('date') !== null){
+            errors += `- **${interaction.options.get('date').value}** is not a valid **date** in the MM.DD. format!\n`
         }
         if (!isvalidpings && interaction.options.get('special_pings') !== null){
             errors += '- **List of pings** did not match the specification\n'
@@ -79,7 +79,7 @@ async function edit(interaction, client){
             toChange.push(` month = ${date.getMonth()}`)
             toChange.push(` day = ${date.getDate()}`)
             const now = new Date()
-            changes += `- ${oldData.year > now.getFullYear() ? `${oldData.year}.` : ''}${`${oldData.month}`.padStart(2, '0')}.${`${oldData.day}`.padStart(2, '0')}. -> ${date.getFullYear() > now.getFullYear() ? `${date.getFullYear()}.` : ''}${`${date.getMonth()}`.padStart(2, '0')}.${`${date.getDate()}`.padStart(2, '0')}.\n`
+            changes += `- ${oldData.year > now.getFullYear() ? `${oldData.year}.` : ''}${`${oldData.month + 1}`.padStart(2, '0')}.${`${oldData.day}`.padStart(2, '0')}. -> ${date.getFullYear() > now.getFullYear() ? `${date.getFullYear()}.` : ''}${`${date.getMonth() + 1}`.padStart(2, '0')}.${`${date.getDate()}`.padStart(2, '0')}.\n`
         }
         if (interaction.options.get('subject') !== null){
             toChange.push(` subject = '${interaction.options.get('subject').value}'`)
