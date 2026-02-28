@@ -32,10 +32,10 @@ async function listPings(args){
         return ''
     }
     for (let pingid of pingsarr) {
-        if (pingid.slice(0, 1) === '<'){
+        if (pingid[0] === '<'){
             pingid = pingid.slice(2, pingid.length - 1)
         }
-        if (pingid.slice(0, 1) === '&'){
+        if (pingid[0] === '&'){
             const roleid = pingid.slice(1, pingid.length)
             if (args.guild.roles.cache.find(x => x.id === roleid) !== undefined){
                 if(args.ping){
@@ -110,4 +110,20 @@ function toCsv(string){
     return result
 }
 
-module.exports = {spam, channelExists, listPings, isPermitted, toDate, toCsv}
+async function isValidPing(ping, guild, client){
+    console.log(`todays ping: ${ping}`)
+    try{
+        if (ping[0] === '&'){
+            guild.roles.cache.get(ping)
+        }
+        else{
+            await client.users.fetch(ping)
+        }
+        return true
+    }
+    catch{
+        return false
+    }
+}
+
+module.exports = {spam, channelExists, listPings, isPermitted, toDate, toCsv, isValidPing}

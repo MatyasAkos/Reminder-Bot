@@ -1,6 +1,6 @@
 const { EmbedBuilder } = require('@discordjs/builders')
 const Database = require('better-sqlite3')
-const { listPings, toDate, toCsv } = require('../misc')
+const { listPings, toDate, toCsv, isValidPing } = require('../misc')
 const db = new Database('database.db', {fileMustExist: true})
 
 async function edit(interaction, client){
@@ -8,7 +8,6 @@ async function edit(interaction, client){
     .prepare('SELECT COUNT(*) AS cnt FROM exams WHERE guildid = ?')
     .get(interaction.guildId).cnt
     let errors = ''
-    console.log(examcnt)
     if(examcnt === 0){
         errors += '- There are no upcoming exams\n'
     }
@@ -33,29 +32,37 @@ async function edit(interaction, client){
     const isnottoolongsubjectlen = interaction.options.get('subject')?.value.length <= subjectlen
     const isnottoolongtypelen = interaction.options.get('type')?.value.length <= typelen
     const isnottoolongtopiclen = (interaction.options.get('topic')?.value || '').length <= topiclen
-    const isvalidpings = /^<@&?\d{1,25}>( <@&?\d{1,25}>)*$/.test(interaction.options.get('special_pings')?.value || '<@&0>')
+    let isvalidpings = interaction.options.get('special_pings') === null || /^<@&?\d{1,25}>( <@&?\d{1,25}>)*$/.test(interaction.options.get('special_pings').value)
+    if(interaction.options.get('special_pings') !== null){
+        const pingarr = interaction.options.get('special_pings').value.split(' ').map(e => e.slice(2, interaction.options.get('special_pings').value.length - 3))
+        let i = 0
+        while(isvalidpings && i < pingarr.length){
+            isvalidpings = await isValidPing(pingarr[i], interaction.guild, client)
+            i++
+        } 
+    }
     const isnottoomanypings = interaction.options.get('special_pings')?.value?.match(/<@&?\d+>/g)?.length ?? 0 <= maxpings
     if(interaction.options.data.map(e => e.name === 'id' ? null : e.value).filter(e => e !== null) == false){
         errors += '- Nothing was provided to change\n'
     }
     else{
+        if (!isvaliddate && interaction.options.get('date') !== null){
+            errors += `- **${interaction.options.get('date').value}** is not a valid **date** in the MM.DD. format!\n`
+        }
         if (!isnottoolongsubjectlen && interaction.options.get('subject') !== null){
             errors += `- **Subject name** longer than **${subjectlen}** characters!\n`
         }
         if (!isnottoolongtypelen && interaction.options.get('type') !== null){
-            errors += `- **Exam type** name longer than **${typelen}** characters!\n`
+            errors += `- **Exam type** longer than **${typelen}** characters!\n`
         }
         if (!isnottoolongtopiclen && interaction.options.get('topic') !== null){
             errors += `- **Topic** longer than **${topiclen}** characters!\n`
-        }
-        if (!isvaliddate && interaction.options.get('date') !== null){
-            errors += `- **${interaction.options.get('date').value}** is not a valid **date** in the MM.DD. format!\n`
         }
         if (!isvalidpings && interaction.options.get('special_pings') !== null){
             errors += '- **List of pings** did not match the specification\n'
         }
         else if (!isnottoomanypings && interaction.options.get('special_pings') !== null){
-            errors += `- A maximum of **${maxpings}** special pings can be specified\n`
+            errors += `- A maximum of **${maxpings} special pings** can be specified\n`
         }
     }
     if (errors.length > 0){

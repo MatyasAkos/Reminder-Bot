@@ -1,6 +1,6 @@
 const { EmbedBuilder } = require('@discordjs/builders')
 const Database = require('better-sqlite3')
-const { listPings, toDate, toCsv } = require('../misc')
+const { listPings, toDate, toCsv, isValidPing } = require('../misc')
 const db = new Database('database.db', {fileMustExist: true})
 
 async function exam(interaction, client){
@@ -16,31 +16,39 @@ async function exam(interaction, client){
     const isnottoolongsubjectlen = interaction.options.get('subject').value.length <= subjectlen
     const isnottoolongtypelen = interaction.options.get('type').value.length <= typelen
     const isnottoolongtopiclen = (interaction.options.get('topic')?.value || '').length <= topiclen
-    const isvalidpings = /^<@&?\d{1,25}>( <@&?\d{1,25}>)*$/.test(interaction.options.get('special_pings')?.value || '<@&0>')
+    let isvalidpings = interaction.options.get('special_pings') === null || /^<@&?\d{1,25}>( <@&?\d{1,25}>)*$/.test(interaction.options.get('special_pings').value)
+    if(interaction.options.get('special_pings') !== null){
+        const pingarr = interaction.options.get('special_pings').value.split(' ').map(e => e.slice(2, interaction.options.get('special_pings').value.length - 3))
+        let i = 0
+        while(isvalidpings && i < pingarr.length){
+            isvalidpings = await isValidPing(pingarr[i], interaction.guild, client)
+            i++
+        } 
+    }
     const isnottoomanypings = interaction.options.get('special_pings')?.value?.match(/<@&?\d+>/g)?.length ?? 0 <= maxpings
 
     let errors = ''
 
     if (!isnottoomanyexams){
-        errors += `- You cannot have more than ${maxexam} exams at a time!\n`
+        errors += `- You cannot have more than **${maxexam}** exams at a time!\n`
     }
     if (!isvaliddate){
-        errors += `${interaction.options.get('date').value} is not a valid date in the MM.DD. format!\n`
+        errors += `**${interaction.options.get('date').value}** is not a valid **date** in the MM.DD. format!\n`
     }
     if (!isnottoolongsubjectlen){
-        errors += `- Subject name longer than ${subjectlen} characters!\n`
+        errors += `- **Subject name** longer than **${subjectlen}** characters!\n`
     }
     if (!isnottoolongtypelen){
-        errors += `- Exam type name longer than ${typelen} characters!\n`
+        errors += `- **Exam type** longer than **${typelen}** characters!\n`
     }
     if (!isnottoolongtopiclen){
-        errors += `- Topic longer than ${topiclen} characters!\n`
+        errors += `- **Topic** longer than **${topiclen}** characters!\n`
     }
     if (!isvalidpings){
-        errors += '- List of pings did not match the specification\n'
+        errors += '- **List of pings** did not match the specification\n'
     }
     else if (!isnottoomanypings){
-        errors += `- A maximum of ${maxpings} special pings can be specified\n`
+        errors += `- A maximum of **${maxpings} special pings** can be specified\n`
     }
     let embed = new EmbedBuilder()
     if (errors === ''){
