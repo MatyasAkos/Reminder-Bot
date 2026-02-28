@@ -7,9 +7,17 @@ async function list(interaction, client){
     const conf = db
     .prepare('SELECT * FROM servers WHERE guildid = ?')
     .get(interaction.guildId)
-    const exams = db
+    let exams = db
     .prepare('SELECT * FROM exams WHERE guildid = ? ORDER BY year, month, day')
     .all(interaction.guildId)
+    if(exams.length === 0){
+        const embed = new EmbedBuilder()
+        .setColor(conf.embedcolor)
+        .setTitle('No upcoming exams')
+        .setDescription('There are no upcoming exams')
+        interaction.reply({embeds: [embed]})
+    }
+    exams = exams.filter(exam => concernsUser(user, exam.pings.split(',')))
     if(exams.length === 0){
         const embed = new EmbedBuilder()
         .setColor(conf.embedcolor)
@@ -54,3 +62,17 @@ async function list(interaction, client){
     }
 }
 module.exports = {list}
+
+function concernsUser(user, pinglist){
+    for (const ping of pinglist) {
+        if (ping.slice(0, 1) === '&'){
+            if (user.roles.cache.has(ping.slice(1, ping.length))){
+                return true
+            }
+        }
+        else if (user.id === ping){
+            return true
+        }
+    }
+    return false
+}
