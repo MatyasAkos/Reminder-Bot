@@ -4,7 +4,7 @@ const db = new Database('database.db', {fileMustExist: true})
 
 function manageroles(interaction){
     let embed = new EmbedBuilder()
-    const commandlist = ['config', 'exam', 'getconfig', 'help', 'list', 'listroles', 'remove', 'removeall', 'reset']
+    const commandlist = ['config', 'exam', 'getconfig', 'help', 'list', 'listroles', 'remove', 'removeall', 'reset', 'edit']
     let changelist = []
     let changedcommandslist = []
     let error = false

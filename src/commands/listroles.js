@@ -4,7 +4,7 @@ const db = new Database('database.db', {fileMustExist: true})
 
 async function listroles(interaction){
     const roles = db
-    .prepare('SELECT config, exam, getconfig, help, list, listroles, manageroles, remove, removeall, reset FROM servers WHERE guildid = ?')
+    .prepare('SELECT config, exam, getconfig, help, list, listroles, manageroles, remove, removeall, reset, edit FROM servers WHERE guildid = ?')
     .get(interaction.guildId)
     let result = ''
     for (const [key, value] of Object.entries(roles)) {
@@ -12,7 +12,7 @@ async function listroles(interaction){
             result += `/${key}: everyone\n`
         }
         else{
-            const rolename = (await interaction.guild.roles.fetch(value)).name
+            const rolename = interaction.guild.roles.cache.get(value)?.name
             result += `/${key}: ${rolename === undefined ? 'admins only' : `@${rolename}`}\n`
         }
     }

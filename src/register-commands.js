@@ -166,6 +166,12 @@ const commands = [
                 description: 'Who can use /reset.',
                 type: ApplicationCommandOptionType.String,
                 required: false
+            },
+            {
+                name: 'edit',
+                description: 'Who can use /edit.',
+                type: ApplicationCommandOptionType.String,
+                required: false
             }
         ]
     },
