@@ -1,6 +1,6 @@
 const Database = require('better-sqlite3')
 const { EmbedBuilder } = require('discord.js')
-const { spam } = require('../misc')
+const { spam, channelExists } = require('../misc')
 const db = new Database('database.db', {fileMustExist: true})
 
 function config(interaction, rowexists){
@@ -8,6 +8,8 @@ function config(interaction, rowexists){
     const isvalidtime = /^((2[0-3])|([01]\d)):[0-5]\d$/.test(time)
     const embedcolor = interaction.options.get('embedcolor')?.value
     const inadvance = interaction.options.get('days_in_advance')?.value
+    const remindchannel = interaction.options.get('reminder_channel')?.value
+    const isvalidchannel = /^#\d{1-25}$/.test(remindchannel) && channelExists(remindchannel.slice(1, remindchannel.length))
     let errors = ''
     if (time !== undefined && !isvalidtime){
         errors += `- **${time}** is not a valid **time** in HH:MM format\n`
@@ -15,12 +17,18 @@ function config(interaction, rowexists){
     if (inadvance !== undefined && inadvance < 0){
         errors += '- **Days in advance** mustn\'t be **negative**\n'
     }
+    if (!isvalidchannel){
+        errors += 'Invalid **channel** for reminders'
+    }
     if (!rowexists){
         if(time === undefined){
             errors += '- **Time** must be specified when first configing the bot\n'
         }
         if(inadvance === undefined){
             errors += '- **Days in advance** must be specified when first configing the bot\n'
+        }
+        if(remindchannel === undefined){
+            errors += '- A **channel** to send the reminders in must be specified when first configuing the bot\n'
         }
     }
     else{
@@ -43,12 +51,15 @@ function config(interaction, rowexists){
             hour: parseInt(time?.slice(0, 2)),
             minute: parseInt(time?.slice(3, 5)),
             inadvance: inadvance,
-            channelid: interaction.channelId,
+            channelid: remindchannel,
             embedcolor: embedcolor !== undefined ? Number(`0x${embedcolor?.slice(1, 7)}`) : 0x008000
         }
+        let vallist = [values.hour, values.minute, values.inadvance, values.channelid, values.embedcolor]
+        vallist = vallist.filter(e => e !== undefined)
+        vallist = vallist.map(e => `${e} = @${e}`)
         if (rowexists){
             db
-            .prepare(`UPDATE servers SET ${time === undefined ? '' : 'hour = @hour, minute = @minute,'} ${inadvance === undefined ? '' : 'inadvance = @inadvance,'} ${embedcolor === undefined ? '' : 'embedcolor = @embedcolor,'} channelid = @channelid WHERE guildid = @guildid`)
+            .prepare(`UPDATE servers SET ${vallist} WHERE guildid = @guildid`)
             .run(values)
         }
         else{

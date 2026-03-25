@@ -60,6 +60,12 @@ const commands = [
                 description: 'Sets the color of the embeds in the reminders and the list produced by /list.',
                 type: ApplicationCommandOptionType.String,
                 required: false
+            },
+            {
+                name: 'reminder_channel',
+                description: 'Sets the channel to send the reminders in.',
+                type: ApplicationCommandOptionType.String,
+                required: false
             }
         ]
     },
